@@ -1,9 +1,10 @@
 from django.urls import path
 
 from advertisements.views import AdvertisementsUserListView, AdvertisementDetailView, AdvertisementCreateView, \
-    AdvertisementDeleteView, AdvertisementUpdateView, HomePageView
+    AdvertisementDeleteView, AdvertisementUpdateView, HomePageView, SearchResultsView
 
 urlpatterns = [
+    path('search/', SearchResultsView.as_view(), name='search_results'),
     path("advertisements", HomePageView.as_view(), name='advertisements'),
     path("advertisements/my", AdvertisementsUserListView.as_view(), name='advertisements-user'),
     path("advertisement/<int:pk>/", AdvertisementDetailView.as_view(), name='advertisement'),

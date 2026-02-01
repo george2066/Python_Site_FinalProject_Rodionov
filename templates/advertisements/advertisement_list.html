@@ -2,10 +2,21 @@
 
 {% block content %}
 
-{% if object_list %}
-<h3>All my advertisements</h3>
+{% if advertisements %}
+<h3>All advertisements</h3>
+{% else %}
+<h3>Haven`t advertisement</h3>
+{% endif %}
+<form action="{% url 'search_results' %}" method="get">
+    <input name="q" type="text" placeholder="Search...">
+    <button type="submit">Search</button>
+    {% if request.GET.q %}
+        <button type="submit" formnovalidate name="clear" value="true">Reset Search</button>
+    {% endif %}
+</form>
+{% if advertisements %}
 <ul>
-    {% for advertisement in object_list %}
+    {% for advertisement in advertisements %}
     <li>
         <a href="{% url 'advertisement' advertisement.id %}" role="button">
             {{ advertisement.title }}
@@ -13,7 +24,5 @@
     </li>
     {% endfor %}
 </ul>
-{% else %}
-<h3>Haven`t advertisement</h3>
 {% endif %}
 {% endblock %}

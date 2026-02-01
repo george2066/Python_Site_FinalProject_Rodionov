@@ -15,7 +15,7 @@
 {% if advertisements %}
 <h3>All my advertisements</h3>
 <ul>
-    {% for advertisement in object_list %}
+    {% for advertisement in advertisements %}
     <li>
         <a href="{% url 'advertisement' advertisement.id %}" role="button">
             {{ advertisement.title }}

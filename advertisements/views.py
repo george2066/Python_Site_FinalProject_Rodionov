@@ -99,3 +99,16 @@ class HomePageView(TemplateView):
         advertisements = Advertisement.objects.all()
         context['advertisements'] = advertisements
         return context
+
+
+class SearchResultsView(ListView):
+    model = Advertisement
+    template_name = 'search_results.html'
+    context_object_name = 'advertisements'
+
+    def get_queryset(self):  # новый
+        query = self.request.GET.get('q')
+        advertisements = Advertisement.objects.filter(
+            Q(title__icontains=query)
+        )
+        return advertisements
