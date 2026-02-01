@@ -64,3 +64,11 @@ class AdvertisementCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('advertisements')
+
+class AdvertisementDeleteView(LoginRequiredMixin, DeleteView):
+    login_url = reverse_lazy('account_login')
+    model = Advertisement
+    success_url = reverse_lazy('advertisements')
+
+    def get_queryset(self):
+        return Advertisement.objects.for_user(self.request.user)

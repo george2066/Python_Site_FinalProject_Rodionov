@@ -8,5 +8,10 @@
     <p>Category: {{ object.category }}     </p>
     <p>Description: {{ object.description }}  </p>
 </div>
+{% if request.user == object.author %}
+<p>
+    <input value="Delete advertisement" type="button" onclick="location.href='{% url "advertisement-delete" object.id %}'"/>
+</p>
+{% endif %}
 <input value="Cancel" type="button" onclick="location.href='{% url "advertisements" %}'">
 {% endblock %}

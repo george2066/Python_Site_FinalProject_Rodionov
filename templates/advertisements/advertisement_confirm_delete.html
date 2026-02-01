@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>Delete advertisements</h3>
+<p>Are you sure you want to delete {{ object.title }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <input value="Delete" type="submit">
+    <input value="Cancel" type="button" onclick="location.href='{% url "advertisements" %}'">
+</form>
+{% endblock %}
