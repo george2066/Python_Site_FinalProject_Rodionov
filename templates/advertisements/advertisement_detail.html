@@ -10,6 +10,9 @@
 </div>
 {% if request.user == object.author %}
 <p>
+    <input value="Update advertisement" type="button" onclick="location.href='{% url "advertisement-update" object.id %}'"/>
+</p>
+<p>
     <input value="Delete advertisement" type="button" onclick="location.href='{% url "advertisement-delete" object.id %}'"/>
 </p>
 {% endif %}

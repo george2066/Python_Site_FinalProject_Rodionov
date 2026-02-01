@@ -72,3 +72,21 @@ class AdvertisementDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return Advertisement.objects.for_user(self.request.user)
+
+class AdvertisementUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = reverse_lazy('account_login')
+    model = Advertisement
+    fields = [
+        'image_url',
+        'title',
+        'category',
+        'description',
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Update advertisement'
+        return context
+
+    def get_success_url(self):
+        return reverse('advertisements')
