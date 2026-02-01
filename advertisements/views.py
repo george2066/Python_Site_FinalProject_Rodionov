@@ -45,3 +45,22 @@ class AdvertisementDetailView(DetailView):
         context['author_id'] = advertisement.author
         context['description'] = advertisement.description
         return context
+
+class AdvertisementCreateView(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('account_login')
+    model = Advertisement
+    fields = [
+        'image_url',
+        'title',
+        'category',
+        'description',
+        'price',
+        'location',
+    ]
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('advertisements')

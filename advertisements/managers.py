@@ -13,8 +13,5 @@ class AdvertisementManager(models.Manager):
 class CategoryManager(models.Manager):
     pass
 
-class RentalRequestManager(models.Manager):
-    pass
-
 class TransactionManager(models.Manager):
     pass

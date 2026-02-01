@@ -16,5 +16,7 @@
 {% else %}
 <h3>You haven`t advertisement</h3>
 {% endif %}
-
+<p>
+    <input value="Add a new advertisement" type="button" onclick="location.href='{% url "advertisement-add" %}'"/>
+</p>
 {% endblock %}
