@@ -7,7 +7,7 @@
 <ul>
     {% for advertisement in object_list %}
     <li>
-        <a>
+        <a href="{% url 'advertisement' advertisement.id %}" role="button">
             {{ advertisement.title }}
         </a>
     </li>
@@ -16,4 +16,5 @@
 {% else %}
 <h3>You haven`t advertisement</h3>
 {% endif %}
+
 {% endblock %}

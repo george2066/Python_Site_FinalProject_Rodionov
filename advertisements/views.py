@@ -30,3 +30,18 @@ class AdvertisementsUserListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Advertisement.objects.for_user(self.request.user)
+
+class AdvertisementDetailView(DetailView):
+    login_url = reverse_lazy('account_login')
+    model = Advertisement
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        advertisement = self.object
+        context['image'] = advertisement.image_url
+        context['title'] = advertisement.title
+        context['category'] = advertisement.category
+        context['author_id'] = advertisement.author
+        context['description'] = advertisement.description
+        return context

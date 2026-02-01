@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<img src="{{ object.image_url }}" width="300" height="200" alt="image">
+<div>
+    <p>Title: {{ object.title }}        </p>
+    <p>Owner: {{ object.owner }}         </p>
+    <p>Category: {{ object.category }}     </p>
+    <p>Description: {{ object.description }}  </p>
+</div>
+<input value="Cancel" type="button" onclick="location.href='{% url "advertisements" %}'">
+{% endblock %}
