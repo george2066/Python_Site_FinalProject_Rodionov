@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<img src="{{ object.image_url }}" width="300" height="200" alt="image">
+<div>
+    <p>username: {{ object.username }}        </p>
+    <p>first_name: {{ object.first_name }}         </p>
+    <p>last_name: {{ object.last_name }}     </p>
+    <p>email: {{ object.email }}  </p>
+</div>
+<p>
+    <input value="Add a new advertisement" type="button" onclick="location.href='{% url "advertisement-add" %}'"/>
+</p>
+{% endblock %}
