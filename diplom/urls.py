@@ -17,10 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 
 from advertisements import views
+import diplom.views as sign
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('', views.home, name='home'),
+    path('registration/', sign.register, name='register'),
+    path('login/', sign.user_login, name='login'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
     path('', include('advertisements.urls')),
