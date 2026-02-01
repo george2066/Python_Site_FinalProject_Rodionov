@@ -8,7 +8,7 @@ class AdvertisementManager(models.Manager):
         return reverse('advertisement', args=[self.pk])
 
     def for_user(self, user):
-        return self.get_queryset().filter(owner_id=user)
+        return self.get_queryset().filter(author_id=user)
 
 class CategoryManager(models.Manager):
     pass

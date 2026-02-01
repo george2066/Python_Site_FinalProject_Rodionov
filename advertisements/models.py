@@ -61,7 +61,6 @@ class RentalRequest(models.Model):
     def __str__(self):
         return f"Запрос на аренду с {self.start_date} по {self.end_date}"
 
-
 class Transaction(models.Model):
     transaction_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата транзакции")
     rental_cost = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Стоимость аренды")
