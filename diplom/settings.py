@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "advertisements",
     "rest_framework",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
@@ -151,9 +152,21 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 
 # Pagination
+
 PAGE_ENTITY = 2
 
 
 # Yookassa
+
 YOOKASSA_SHOP_ID = os.getenv("YOOKASSA_SHOP_ID")
 YOOKASSA_SECRET_KEY = os.getenv("YOOKASSA_SECRET_KEY")
+
+
+# Swagger
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    },
+    "USE_SESSION_AUTH": False,
+}

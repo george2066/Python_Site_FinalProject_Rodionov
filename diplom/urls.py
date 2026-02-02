@@ -19,9 +19,15 @@ from django.urls import path, include
 
 from advertisements import views
 import diplom.views as sign
+from diplom.swagger import schema_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "docs/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
     path("accounts/", include("allauth.urls")),
     path("", views.home, name="home"),
     path("registration/", sign.register, name="register"),
