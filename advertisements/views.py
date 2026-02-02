@@ -86,7 +86,6 @@ def buy_advertisement(request, ad_id):
         return redirect("advertisement_detail", ad_id=ad_id)
 
 
-
 def payment_success(request):
     payment_id = request.session.get("payment_id")
     if not payment_id:
@@ -227,6 +226,7 @@ class HomePageView(TemplateView):
 
         # Получаем все объявления
         advertisements = Advertisement.objects.all()
+        advertisements = advertisements.filter(sold=False)
 
         # Настройка пагинации (10 объявлений на страницу)
         paginator = Paginator(advertisements, settings.PAGE_ENTITY)
