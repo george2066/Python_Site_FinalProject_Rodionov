@@ -30,4 +30,5 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("", include("advertisements.urls")),
     path("", include("users.urls")),
+    path("", include("api.urls")),
 ]

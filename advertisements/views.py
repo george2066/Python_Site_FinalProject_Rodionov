@@ -136,16 +136,18 @@ def payment_success(request):
         context,  # Передаём словарь, а не QuerySet
     )
 
+
 @csrf_exempt
 def yookassa_webhook(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         data = json.loads(request.body)
         # Обрабатываем событие (например, payment.succeeded)
-        if data['event'] == 'payment.succeeded':
-            payment = data['object']
+        if data["event"] == "payment.succeeded":
+            payment = data["object"]
             # Обновляем БД: отмечаем заказ как оплаченный
-        return JsonResponse({'status': 'ok'})
-    return JsonResponse({'error': 'Invalid request'}, status=400)
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 # Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):

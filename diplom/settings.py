@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "advertisements",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [

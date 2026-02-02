@@ -5,20 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0003_transaction_created_at'),
+        ("advertisements", "0003_transaction_created_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='advertisement',
-            name='sold',
+            model_name="advertisement",
+            name="sold",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 2, 19, 41, 24, 469502), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 2, 19, 41, 24, 469502),
+                verbose_name="Дата создания",
+            ),
         ),
     ]
