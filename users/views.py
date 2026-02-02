@@ -2,16 +2,46 @@ import os
 
 from django.views.generic import UpdateView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 
 from advertisements.models import Advertisement
+from diplom import settings
 from users.models import User
 
+@login_required
+@require_http_methods(['GET'])
+def load_more_advertisements(request):
+    user = request.user
+    page = int(request.GET.get('page', settings.PAGE_ENTITY))
+    per_page = settings.PAGE_ENTITY
+
+    # Все объявления пользователя, кроме первого (которое уже показано)
+    all_ads = Advertisement.objects.filter(author=user).order_by('-created_at')[settings.PAGE_ENTITY:]
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    more_ads = all_ads[start:end]
+
+    data = {
+        'advertisements': [
+            {
+                'id': ad.id,
+                'title': ad.title,
+                'url': request.build_absolute_uri(f'/advertisement/{ad.id}/')
+            }
+            for ad in more_ads
+        ],
+        'has_more': len(all_ads) > end
+    }
+    return JsonResponse(data)
 
 # Create your views here.
 class UserDetailView(LoginRequiredMixin, DetailView):
     model = User
-
     template_name = os.path.join('users', 'profile.html')
 
     def get_object(self, queryset=None):
@@ -20,13 +50,18 @@ class UserDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.object
-        advertisements = Advertisement.objects.filter(author=self.object).order_by('-created_at')
+
+        # Изначально показываем только 1 объявление
+        advertisements = Advertisement.objects.filter(author=user).order_by('-created_at')[:settings.PAGE_ENTITY]
+        context['advertisements'] = advertisements
+        context['total_advertisements'] = Advertisement.objects.filter(author=user).count()
+        context['pagination'] = settings.PAGE_ENTITY
         context['image'] = user.image_url
         context['username'] = user.username
         context['email'] = user.email
         context['first_name'] = user.first_name
         context['last_name'] = user.last_name
-        context['advertisements'] = advertisements
+
         return context
 
 class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):

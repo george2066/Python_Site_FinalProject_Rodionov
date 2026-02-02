@@ -3,27 +3,86 @@
 {% block content %}
 <img src="{{ object.image_url }}" width="300" height="200" alt="image">
 <div>
-    <p>username: {{ object.username }}        </p>
-    <p>first_name: {{ object.first_name }}         </p>
-    <p>last_name: {{ object.last_name }}     </p>
-    <p>email: {{ object.email }}  </p>
+    <p>username: {{ object.username }}</p>
+    <p>first_name: {{ object.first_name }}</p>
+    <p>last_name: {{ object.last_name }}</p>
+    <p>email: {{ object.email }}</p>
 </div>
-    <p><input value="Add a new advertisement" type="button" onclick="location.href='{% url "advertisement-add" %}'"/></p>
-    <p><input value="Profile update" type="button" onclick="location.href='{% url "profile-update" %}'"/></p>
-    <p><input value="Profile delete" type="button" onclick="location.href='{% url "profile-delete" %}'"/></p>
+<p><input value="Add a new advertisement" type="button" onclick="location.href='{% url 'advertisement-add' %}'"/></p>
+<p><input value="Profile update" type="button" onclick="location.href='{% url 'profile-update' %}'"/></p>
+<p><input value="Profile delete" type="button" onclick="location.href='{% url 'profile-delete' %}'"/></p>
+
 <hr>
+
 {% if advertisements %}
-<h3>All my advertisements</h3>
-<ul>
-    {% for advertisement in advertisements %}
-    <li>
-        <a href="{% url 'advertisement' advertisement.id %}" role="button">
-            {{ advertisement.title }}
-        </a>
-    </li>
-    {% endfor %}
-</ul>
+    <h3>My advertisements</h3>
+    <ul id="advertisements-list">
+        <!-- Первое объявление (всегда показано) -->
+        {% for advertisement in advertisements %}
+            <li>
+                <a href="{% url 'advertisement' advertisement.id %}" role="button">
+                    {{ advertisement.title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    <!-- Контейнер для подгруженных объявлений (вне <ul>) -->
+    <div id="more-advertisements"></div>
+
+    <!-- Кнопка "Показать ещё" -->
+    {% if total_advertisements > pagination %}  <!-- Если есть хотя бы 2 объявления -->
+        <button id="load-more-btn" data-page="1">
+            Показать ещё
+        </button>
+    {% endif %}
 {% else %}
-<h3>You haven`t advertisement</h3>
+    <h3>You haven't any advertisements</h3>
 {% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const moreAdsContainer = document.getElementById('more-advertisements');
+    let currentPage = 1;
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            fetch(`{% url 'load_more_advertisements' %}?page=${currentPage}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.advertisements.length > 0) {
+                        // Создаём <ul> для новых объявлений (если ещё нет)
+                        if (!document.getElementById('additional-ads-list')) {
+                            const ul = document.createElement('ul');
+                            ul.id = 'additional-ads-list';
+                            moreAdsContainer.appendChild(ul);
+                        }
+
+                        const ul = document.getElementById('additional-ads-list');
+
+                        // Добавляем новые объявления как <li>
+                        data.advertisements.forEach(ad => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<a href="${ad.url}" role="button">${ad.title}</a>`;
+                            ul.appendChild(li);
+                        });
+
+                        currentPage++;
+
+                        // Скрываем кнопку, если больше нет объявлений
+                        if (!data.has_more) {
+                            loadMoreBtn.style.display = 'none';
+                        }
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+        });
+    }
+});
+</script>
 {% endblock %}
