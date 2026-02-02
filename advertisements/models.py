@@ -41,7 +41,7 @@ class Advertisement(models.Model):
         related_name="advertisements",
         verbose_name="Автор",
     )
-
+    sold = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
     is_active = models.BooleanField(default=True, verbose_name="Активно")

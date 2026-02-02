@@ -15,12 +15,15 @@
         <input value="Reset search" type="button" onclick="location.href='{% url "advertisements" %}'">
     {% endif %}
 </form>
+
 {% if advertisements %}
     <ul>
         {% for advertisement in advertisements %}
             <li>
                 <a href="{% url 'advertisement' advertisement.id %}" role="button">
-                    {{ advertisement.title }}
+                    {% if not advertisement.sold %}
+                        {{ advertisement.title }}
+                    {% endif %}
                 </a>
             </li>
         {% endfor %}

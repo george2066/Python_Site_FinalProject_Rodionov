@@ -1,13 +1,19 @@
 import os
+import json
+import logging
 
-from django.shortcuts import render
+
+from yookassa import Configuration, Payment
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.urls import reverse
-from yookassa import Configuration, Payment
-import json
-
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy, reverse
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.views.generic import (
     ListView,
     CreateView,
@@ -16,16 +22,13 @@ from django.views.generic import (
     DeleteView,
     TemplateView,
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy, reverse
-from django.core.paginator import Paginator
-from django.db.models import Q
 
 from advertisements.models import Advertisement, Transaction
 from diplom import settings
 from users.models import User
 
 TEMPLATE_DIR = "advertisements"
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -83,13 +86,6 @@ def buy_advertisement(request, ad_id):
         return redirect("advertisement_detail", ad_id=ad_id)
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Transaction, Advertisement
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 def payment_success(request):
     payment_id = request.session.get("payment_id")
@@ -110,7 +106,8 @@ def payment_success(request):
             # Получаем объекты из БД
             advertisement = get_object_or_404(Advertisement, id=advertisement_id)
             user = get_object_or_404(User, id=user_id)
-
+            advertisement.sold = True
+            advertisement.save()
             # Создаём транзакцию
             transaction = Transaction.objects.create(
                 user=user, advertisement=advertisement
@@ -140,6 +137,16 @@ def payment_success(request):
         context,  # Передаём словарь, а не QuerySet
     )
 
+@csrf_exempt
+def yookassa_webhook(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        # Обрабатываем событие (например, payment.succeeded)
+        if data['event'] == 'payment.succeeded':
+            payment = data['object']
+            # Обновляем БД: отмечаем заказ как оплаченный
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 # Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):
