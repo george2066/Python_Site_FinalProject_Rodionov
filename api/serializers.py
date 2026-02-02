@@ -1,9 +1,52 @@
 from rest_framework import serializers
 
-from django.contrib.auth.models import User
+from users.models import User
 from django.core.validators import validate_email
 
 from advertisements.models import Advertisement, Category, Transaction
+
+
+class AdvertisementSerializer(serializers.ModelSerializer):
+    # Дополнительно выводим название категории и имя автора
+    category_name = serializers.CharField(
+        source="category.name", read_only=True, allow_null=True
+    )
+    author_name = serializers.CharField(source="author.get_full_name", read_only=True)
+    author_email = serializers.EmailField(source="author.email", read_only=True)
+
+    class Meta:
+        model = Advertisement
+        fields = [
+            "id",
+            "image_url",
+            "title",
+            "category",
+            "category_name",
+            "description",
+            "price",
+            "location",
+            "contact_phone",
+            "contact_email",
+            "author",
+            "author_name",
+            "author_email",
+            "sold",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at", "author"]
+
+    def validate_price(self, value):
+        """Проверка, что цена положительная"""
+        if value <= 0:
+            raise serializers.ValidationError("Цена должна быть больше нуля.")
+        return value
+
+    def create(self, validated_data):
+        """При создании объявления автор устанавливается автоматически из контекста"""
+        validated_data["author"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -135,49 +178,6 @@ class CategorySerializer(serializers.ModelSerializer):
         Сейчас просто передаём данные в базовый метод.
         """
         return super().update(instance, validated_data)
-
-
-class AdvertisementSerializer(serializers.ModelSerializer):
-    # Дополнительно выводим название категории и имя автора
-    category_name = serializers.CharField(
-        source="category.name", read_only=True, allow_null=True
-    )
-    author_name = serializers.CharField(source="author.get_full_name", read_only=True)
-    author_email = serializers.EmailField(source="author.email", read_only=True)
-
-    class Meta:
-        model = Advertisement
-        fields = [
-            "id",
-            "image_url",
-            "title",
-            "category",
-            "category_name",
-            "description",
-            "price",
-            "location",
-            "contact_phone",
-            "contact_email",
-            "author",
-            "author_name",
-            "author_email",
-            "sold",
-            "is_active",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["created_at", "updated_at", "author"]
-
-    def validate_price(self, value):
-        """Проверка, что цена положительная"""
-        if value <= 0:
-            raise serializers.ValidationError("Цена должна быть больше нуля.")
-        return value
-
-    def create(self, validated_data):
-        """При создании объявления автор устанавливается автоматически из контекста"""
-        validated_data["author"] = self.context["request"].user
-        return super().create(validated_data)
 
 
 class TransactionSerializer(serializers.ModelSerializer):
