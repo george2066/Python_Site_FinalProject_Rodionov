@@ -3,26 +3,66 @@
 {% block content %}
 
 {% if advertisements %}
-<h3>All advertisements</h3>
+    <h3>All advertisements</h3>
 {% else %}
-<h3>Haven`t advertisement</h3>
+    <h3>Haven't advertisement</h3>
 {% endif %}
+
 <form action="{% url 'search_results' %}" method="get">
-    <input name="q" type="text" placeholder="Search...">
+    <input name="q" type="text" placeholder="Search..." value="{{ query|default:'' }}">
     <button type="submit">Search</button>
     {% if request.GET.q %}
-        <button type="submit" formnovalidate name="clear" value="true">Reset Search</button>
+        <input value="Reset search" type="button" onclick="location.href='{% url "advertisements" %}'">
     {% endif %}
 </form>
+
 {% if advertisements %}
-<ul>
-    {% for advertisement in advertisements %}
-    <li>
-        <a href="{% url 'advertisement' advertisement.id %}" role="button">
-            {{ advertisement.title }}
-        </a>
-    </li>
+    <ul>
+        {% for advertisement in advertisements %}
+            <li>
+                <a href="{% url 'advertisement' advertisement.id %}" role="button">
+                    {{ advertisement.title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Блок пагинации -->
+    <div class="pagination">
+        <!-- Кнопка "Previous" -->
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn">Previous</a>
+    {% else %}
+        <span class="btn disabled">Previous</span>
+    {% endif %}
+
+    <!-- Номера страниц -->
+    {% for num in page_obj.paginator.page_range %}
+        <!-- Показываем только: текущую страницу, ±2 от неё -->
+        {% if num == page_obj.number %}
+            <span class="btn current">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="btn">{{ num }}</a>
+        {% endif %}
     {% endfor %}
-</ul>
+
+    <!-- Эллипсис перед последней страницей (если пропущены страницы) -->
+    {% if page_obj.paginator.num_pages > page_obj.number|add:'3' %}
+        <span class="ellipsis">...</span>
+    {% endif %}
+
+    <!-- Последняя страница (только если она не показана выше) -->
+    {% if page_obj.number|add:'3' < page_obj.paginator.num_pages %}
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" class="btn">{{ page_obj.paginator.num_pages }}</a>
+    {% endif %}
+
+    <!-- Кнопка "Next" -->
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn">Next</a>
+    {% else %}
+        <span class="btn disabled">Next</span>
+    {% endif %}
+    </div>
 {% endif %}
+
 {% endblock %}
