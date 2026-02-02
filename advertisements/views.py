@@ -23,6 +23,7 @@ from django.views.generic import (
     TemplateView,
 )
 
+from advertisements.forms import AdvertisementForm
 from advertisements.models import Advertisement, Transaction
 from diplom import settings
 from users.models import User
@@ -149,6 +150,37 @@ def yookassa_webhook(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
+def approve_ad(request):
+    # Получаем все неодобренные объявления
+    advertisements = Advertisement.objects.filter(is_approved=False)
+    advertisemtnts = advertisements.filter(sold=False)
+
+    if request.method == 'POST':
+        # Получаем список ID из чекбоксов (name="approve_ad")
+        approved_ids = request.POST.getlist('approve_ad')
+
+        # Обновляем только выбранные объявления
+        Advertisement.objects.filter(id__in=approved_ids).update(is_approved=True)
+
+        # Добавляем сообщение об успехе (опционально)
+        messages.success(request, f'Одобрено {len(approved_ids)} объявлений.')
+
+        return redirect('advertisements')  # Редирект на ту же страницу
+
+    return render(request, os.path.join('advertisements', 'advertisement_approve.html'), {'advertisements': advertisements})
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("account_login")
@@ -229,6 +261,7 @@ class HomePageView(TemplateView):
         # Получаем все объявления
         advertisements = Advertisement.objects.all()
         advertisements = advertisements.filter(sold=False)
+        advertisements = advertisements.filter(is_approved=True)
 
         # Настройка пагинации (10 объявлений на страницу)
         paginator = Paginator(advertisements, settings.PAGE_ENTITY)
@@ -252,7 +285,10 @@ class SearchResultsView(ListView):
         clear = self.request.GET.get("clear")
 
         if clear == "true":
-            return Advertisement.objects.all()
+            advertisements = Advertisement.objects.all()
+            advertisements = advertisements.filter(sold=False)
+            advertisements = advertisements.filter(is_approved=True)
+            return advertisements
 
         if query:
             return Advertisement.objects.filter(Q(title__icontains=query))

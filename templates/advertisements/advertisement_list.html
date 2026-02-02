@@ -21,9 +21,7 @@
         {% for advertisement in advertisements %}
             <li>
                 <a href="{% url 'advertisement' advertisement.id %}" role="button">
-                    {% if not advertisement.sold %}
-                        {{ advertisement.title }}
-                    {% endif %}
+                    {{ advertisement.title }}
                 </a>
             </li>
         {% endfor %}

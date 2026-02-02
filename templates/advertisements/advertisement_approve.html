@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Объявления на модерацию</h1>
+
+{% if advertisements %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="ads-list">
+            {% for ad in advertisements %}
+                <div class="ad-item" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                    <!-- Изображение -->
+                    {% if ad.image_url %}
+                        <img src="{{ ad.image_url }}" width="200" height="150" alt="Изображение объявления" style="float: left; margin-right: 15px;">
+                    {% else %}
+                        <div style="width: 200px; height: 150px; background-color: #f0f0f0; float: left; margin-right: 15px; display: flex; align-items: center; justify-content: center;">
+                            Нет изображения
+                        </div>
+                    {% endif %}
+
+                    <!-- Информация об объявлении -->
+                    <div style="overflow: hidden;">
+                        <h3>{{ ad.title }}</h3>
+                        <p><strong>Автор:</strong> {{ ad.author.username }}</p>
+                        <p><strong>Категория:</strong> {% if ad.category %}{{ ad.category.name }}{% else %}Не указана{% endif %}</p>
+                        <p><strong>Описание:</strong> {{ ad.description|truncatewords:20 }}</p>
+                        <p><strong>Цена:</strong> {{ ad.price }} руб.</p>
+                        <p><strong>Местоположение:</strong> {{ ad.location }}</p>
+                        <p><strong>Телефон:</strong> {% if ad.contact_phone %}{{ ad.contact_phone }}{% else %}Не указан{% endif %}</p>
+                        <p><strong>Email:</strong> {% if ad.contact_email %}{{ ad.contact_email }}{% else %}Не указан{% endif %}</p>
+                        <p><strong>Дата создания:</strong> {{ ad.created_at|date:"d.m.Y H:i" }}</p>
+
+                        <!-- Чекбокс для одобрения -->
+                        <div style="margin-top: 10px;">
+                            <label>
+                                <input type="checkbox" name="approve_ad" value="{{ ad.id }}">
+                                Одобрить это объявление
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Кнопка отправки -->
+        <button type="submit" style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+            Одобрить выбранные объявления
+        </button>
+    </form>
+{% else %}
+    <p>Нет объявлений на модерацию.</p>
+{% endif %}
+
+<!-- Кнопка возврата -->
+<div style="margin-top: 20px;">
+    <input value="Посмотреть объявления" type="button" onclick="location.href='{% url "advertisements" %}'">
+</div>
+
+{% endblock %}

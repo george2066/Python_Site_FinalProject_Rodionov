@@ -10,7 +10,10 @@ from advertisements.views import (
     SearchResultsView,
     buy_advertisement,
     payment_success,
+approve_ad
 )
+
+
 
 urlpatterns = [
     path("search/", SearchResultsView.as_view(), name="search_results"),
@@ -40,6 +43,13 @@ urlpatterns = [
         AdvertisementUpdateView.as_view(),
         name="advertisement-update",
     ),
+path('advertisements/approve', approve_ad, name='approve'),
     path("ad/<int:ad_id>/buy/", buy_advertisement, name="buy_advertisement"),
     path("payment/success/", payment_success, name="payment_success"),
 ]
+
+
+
+
+
+
