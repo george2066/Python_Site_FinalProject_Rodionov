@@ -29,4 +29,5 @@ dependencies = [
     "flake8-cognitive-complexity>=0.1.0",
     "flake8-isort>=7.0.0",
     "ruff>=0.14.14",
+    "yookassa>=3.10.0",
 ]

@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 
 from advertisements.managers import (
@@ -74,6 +76,9 @@ class Transaction(models.Model):
         blank=True,
         related_name="transactions",
         verbose_name="Объявление",
+    )
+    created_at = models.DateTimeField(
+        verbose_name="Дата создания", default=datetime.datetime.now()
     )
 
     objects = TransactionManager()

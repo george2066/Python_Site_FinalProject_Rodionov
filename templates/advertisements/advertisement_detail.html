@@ -15,6 +15,13 @@
 <p>
     <input value="Delete advertisement" type="button" onclick="location.href='{% url "advertisement-delete" object.id %}'"/>
 </p>
+{% else %}
+    <a
+        href="{% url 'buy_advertisement' advertisement.id %}"
+        class="btn btn-primary"
+    >
+        Купить
+    </a>
 {% endif %}
 <input value="Cancel" type="button" onclick="location.href='{% url "advertisements" %}'">
 {% endblock %}

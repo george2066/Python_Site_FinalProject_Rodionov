@@ -1,7 +1,12 @@
-from django.shortcuts import render
-
-
 import os
+
+from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.urls import reverse
+from yookassa import Configuration, Payment
+import json
+
 
 from django.views.generic import (
     ListView,
@@ -16,8 +21,9 @@ from django.urls import reverse_lazy, reverse
 from django.core.paginator import Paginator
 from django.db.models import Q
 
-from advertisements.models import Advertisement
+from advertisements.models import Advertisement, Transaction
 from diplom import settings
+from users.models import User
 
 TEMPLATE_DIR = "advertisements"
 
@@ -37,6 +43,102 @@ def about(request):
 
 def contact(request):
     return render(request, "contact.html")
+
+
+def buy_advertisement(request, ad_id):
+    # Получаем объявление
+    advertisement = get_object_or_404(Advertisement, id=ad_id)
+
+    # Настраиваем подключение к ЮКассе
+    Configuration.account_id = settings.YOOKASSA_SHOP_ID
+    Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+
+    # Параметры платежа
+    payment_data = {
+        "amount": {
+            "value": str(advertisement.price),  # Сумма из объявления
+            "currency": "RUB",
+        },
+        "confirmation": {
+            "type": "redirect",
+            "return_url": request.build_absolute_uri(reverse("payment_success")),
+        },
+        "capture": True,
+        "description": f"Оплата объявления: {advertisement.title}",
+        "metadata": {"advertisement_id": str(ad_id), "user_id": str(request.user.id)},
+    }
+
+    try:
+        # Создаём платёж
+        payment = Payment.create(payment_data)
+
+        # Сохраняем ID платежа в сессии (для проверки позже)
+        request.session["payment_id"] = payment.id
+
+        # Переводим пользователя на страницу оплаты
+        return redirect(payment.confirmation.confirmation_url)
+
+    except Exception as e:
+        messages.error(request, f"Ошибка при создании платежа: {e}")
+        return redirect("advertisement_detail", ad_id=ad_id)
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from .models import Transaction, Advertisement
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def payment_success(request):
+    payment_id = request.session.get("payment_id")
+    if not payment_id:
+        messages.error(request, "Платёж не найден.")
+        return redirect("home")
+
+    try:
+        # Проверяем статус платежа через API
+        payment = Payment.find_one(payment_id)
+
+        if payment.status == "succeeded":
+            # Получаем metadata из платежа
+            metadata = payment.metadata
+            advertisement_id = metadata.get("advertisement_id")
+            user_id = metadata.get("user_id")
+
+            # Получаем объекты из БД
+            advertisement = get_object_or_404(Advertisement, id=advertisement_id)
+            user = get_object_or_404(User, id=user_id)
+
+            # Создаём транзакцию
+            transaction = Transaction.objects.create(
+                user=user, advertisement=advertisement
+            )
+
+            messages.success(
+                request, f"Оплата прошла успешно! ID транзакции: {transaction.id}"
+            )
+        else:
+            messages.error(request, f"Платёж не завершён (статус: {payment.status})")
+
+    except Exception as e:
+        logger.error(f"Ошибка при обработке платежа {payment_id}: {e}")
+        messages.error(request, f"Ошибка проверки платежа: {e}")
+
+    # Очищаем session после обработки
+    if "payment_id" in request.session:
+        del request.session["payment_id"]
+
+    # Формируем контекст для шаблона
+    advertisements = Advertisement.objects.all()
+    context = {"advertisements": advertisements}
+
+    return render(
+        request,
+        os.path.join("advertisements", "advertisement_list.html"),
+        context,  # Передаём словарь, а не QuerySet
+    )
 
 
 # Create your views here.
