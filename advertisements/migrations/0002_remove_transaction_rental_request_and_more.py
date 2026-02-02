@@ -4,37 +4,39 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0001_added_advertisement_category_RentalRequest_transactio'),
+        (
+            "advertisements",
+            "0001_added_advertisement_category_RentalRequest_transactio",
+        ),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='transaction',
-            name='rental_request',
+            model_name="transaction",
+            name="rental_request",
         ),
         migrations.RemoveField(
-            model_name='advertisement',
-            name='available_from',
+            model_name="advertisement",
+            name="available_from",
         ),
         migrations.RemoveField(
-            model_name='advertisement',
-            name='available_to',
+            model_name="advertisement",
+            name="available_to",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='rental_cost',
+            model_name="transaction",
+            name="rental_cost",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='rental_end',
+            model_name="transaction",
+            name="rental_end",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='rental_start',
+            model_name="transaction",
+            name="rental_start",
         ),
         migrations.DeleteModel(
-            name='RentalRequest',
+            name="RentalRequest",
         ),
     ]

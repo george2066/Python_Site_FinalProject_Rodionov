@@ -10,18 +10,18 @@ class RegistrationForm(UserCreationForm):
     class Meta:
         model = User
         fields = (
-            'image_url',
-            'first_name',
-            'last_name',
-            'username',
-            'email',
-            'password1',
-            'password2'
+            "image_url",
+            "first_name",
+            "last_name",
+            "username",
+            "email",
+            "password1",
+            "password2",
         )
 
     def save(self, commit=True):
         user = super(RegistrationForm, self).save(commit=False)
-        user.email = self.cleaned_data['email']
+        user.email = self.cleaned_data["email"]
 
         if commit:
             user.save()

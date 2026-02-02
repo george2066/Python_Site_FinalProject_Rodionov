@@ -1,14 +1,41 @@
 from django.urls import path
 
-from advertisements.views import AdvertisementsUserListView, AdvertisementDetailView, AdvertisementCreateView, \
-    AdvertisementDeleteView, AdvertisementUpdateView, HomePageView, SearchResultsView
+from advertisements.views import (
+    AdvertisementsUserListView,
+    AdvertisementDetailView,
+    AdvertisementCreateView,
+    AdvertisementDeleteView,
+    AdvertisementUpdateView,
+    HomePageView,
+    SearchResultsView,
+)
 
 urlpatterns = [
-    path('search/', SearchResultsView.as_view(), name='search_results'),
-    path("advertisements", HomePageView.as_view(), name='advertisements'),
-    path("advertisements/my", AdvertisementsUserListView.as_view(), name='advertisements-user'),
-    path("advertisement/<int:pk>/", AdvertisementDetailView.as_view(), name='advertisement'),
-    path("advertisement/add/", AdvertisementCreateView.as_view(), name='advertisement-add'),
-    path("advertisement/delete/<int:pk>/", AdvertisementDeleteView.as_view(), name='advertisement-delete'),
-    path("advertisement/update/<int:pk>/", AdvertisementUpdateView.as_view(), name='advertisement-update'),
+    path("search/", SearchResultsView.as_view(), name="search_results"),
+    path("advertisements", HomePageView.as_view(), name="advertisements"),
+    path(
+        "advertisements/my",
+        AdvertisementsUserListView.as_view(),
+        name="advertisements-user",
+    ),
+    path(
+        "advertisement/<int:pk>/",
+        AdvertisementDetailView.as_view(),
+        name="advertisement",
+    ),
+    path(
+        "advertisement/add/",
+        AdvertisementCreateView.as_view(),
+        name="advertisement-add",
+    ),
+    path(
+        "advertisement/delete/<int:pk>/",
+        AdvertisementDeleteView.as_view(),
+        name="advertisement-delete",
+    ),
+    path(
+        "advertisement/update/<int:pk>/",
+        AdvertisementUpdateView.as_view(),
+        name="advertisement-update",
+    ),
 ]

@@ -9,8 +9,8 @@ class User(AbstractUser):
     image_url = models.URLField(max_length=200, default=avatar_default)
     email = models.EmailField(unique=True, verbose_name="Адрес электронной почты")
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     class Meta:
         verbose_name = "Пользователь"

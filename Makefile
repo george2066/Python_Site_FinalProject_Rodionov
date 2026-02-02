@@ -15,3 +15,6 @@ install:
 
 showmigrate:
 	python manage.py showmigrations
+
+ruff:
+	ruff format .

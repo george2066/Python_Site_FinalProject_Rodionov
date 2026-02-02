@@ -1,0 +1,21 @@
+repos:
+- repo: https://github.com/george2066/Python_Site_FinalProject_Rodionov.git
+  rev: 6.0.0
+  hooks:
+  - id: flake8
+    args: [
+      "--ignore=E501"
+    ]
+    additional-dependencies: [
+      "flake8-django",
+      "flake8-todo",
+      "flake8-variables-names",
+      "flake8-commas",
+      "pep8-naming",
+      "flake8-bugbear",
+      "flake8-builtins",
+      "flake8-quotes",
+      "pre-commit",
+      "flake8-cognitive-complexity",
+      "flake8-isort",
+    ]
