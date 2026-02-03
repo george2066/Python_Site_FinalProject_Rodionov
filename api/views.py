@@ -6,13 +6,9 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from advertisements.models import Category
-from advertisements.models import Transaction
-from advertisements.models import Advertisement
-from .serializers import CategorySerializer
-from .serializers import TransactionSerializer
-from .serializers import UserSerializer
-from .serializers import AdvertisementSerializer
+from advertisements.models import Category, Transaction, Advertisement, Comment
+from .serializers import CategorySerializer, TransactionSerializer, UserSerializer, AdvertisementSerializer, \
+    CommentSerializer
 
 User = get_user_model()
 
@@ -279,4 +275,68 @@ class TransactionViewSet(ModelViewSet):
         """Возвращает детали транзакции с дополнительной информацией"""
         instance = self.get_object()
         serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+class CommentViewSet(ModelViewSet):
+    """
+    API для управления комментариями (CRUD).
+    """
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    search_fields = ["comment"]
+    ordering_fields = ["create_at", "update_at"]
+    ordering = ["-create_at"]  # сортировка по умолчанию — по дате создания, newest first
+
+    def get_permissions(self):
+        """
+        Права доступа:
+        - Создание/обновление/удаление: только админ.
+        - Чтение: все авторизованные пользователи.
+        """
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        """
+        При создании комментария автоматически присваивается текущий пользователь.
+        """
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        """
+        Можно добавить дополнительные проверки или логику при обновлении.
+        """
+        serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Удаление комментария с проверкой прав.
+        """
+        instance = self.get_object()
+        if request.user != instance.user and not request.user.is_staff:
+            return Response(
+                {"detail": "Нет прав на удаление этого комментария."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="my-comments")
+    def my_comments(self, request):
+        """
+        Получить все комментарии текущего пользователя.
+        """
+        queryset = self.filter_queryset(self.get_queryset().filter(user=request.user))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

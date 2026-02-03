@@ -4,7 +4,7 @@ from .views import (
     AdvertisementViewSet,
     UserViewSet,
     CategoryViewSet,
-    TransactionViewSet,
+    TransactionViewSet, CommentViewSet,
 )
 
 router = DefaultRouter()
@@ -12,6 +12,7 @@ router.register(r"users", UserViewSet, basename="users")
 router.register(r"category", CategoryViewSet, basename="category")
 router.register(r"advertisements", AdvertisementViewSet, basename="advertisement")
 router.register(r"transaction", TransactionViewSet, basename="transaction")
+router.register(r"comment", CommentViewSet, basename="comment")
 
 
 urlpatterns = [

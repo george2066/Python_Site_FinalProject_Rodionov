@@ -3,7 +3,7 @@ from rest_framework import serializers
 from users.models import User
 from django.core.validators import validate_email
 
-from advertisements.models import Advertisement, Category, Transaction
+from advertisements.models import Advertisement, Category, Transaction, Comment
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):
@@ -252,5 +252,49 @@ class TransactionSerializer(serializers.ModelSerializer):
         """
         Обновление транзакции.
         Обычно транзакции не редактируются, но метод оставлен для гибкости.
+        """
+        return super().update(instance, validated_data)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+    advertisement = serializers.PrimaryKeyRelatedField(read_only=True)
+    create_at = serializers.DateTimeField(read_only=True)
+    update_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'user',
+            'advertisement',
+            'comment',
+            'create_at',
+            'update_at',
+        ]
+
+    def validate_comment(self, value):
+        """
+        Проверка, что комментарий не пустой и не состоит из одних пробелов.
+        """
+        if not value or not value.strip():
+            raise serializers.ValidationError("Комментарий не может быть пустым.")
+        return value.strip()
+
+    def create(self, validated_data):
+        """
+        Создание комментария с текущим пользователем и объявлением.
+        Можно переопределить, если нужно автоматически присваивать user и advertisement.
+        """
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            validated_data['user'] = request.user
+            # Предположим, что advertisement передается в контексте или через параметры
+            # Или можно оставить ее для установки в view
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """
+        Обновление комментария.
         """
         return super().update(instance, validated_data)

@@ -175,33 +175,39 @@ def approve_ad(request):
         {"advertisements": advertisements},
     )
 
+
 @csrf_exempt
 @require_POST
 def edit_comment(request):
     data = json.loads(request.body)
-    comment_id = data.get('comment_id')
-    comment_text = data.get('comment')
+    comment_id = data.get("comment_id")
+    comment_text = data.get("comment")
     try:
         comment = Comment.objects.get(id=comment_id, user=request.user)
         comment.comment = comment_text
         comment.save()
-        return JsonResponse({'success': True})
+        return JsonResponse({"success": True})
     except Exception:
-        return JsonResponse({'success': False, 'error': 'Комментарий не найден или недоступен'})
+        return JsonResponse(
+            {"success": False, "error": "Комментарий не найден или недоступен"}
+        )
 
 
 @csrf_exempt
 def delete_comment(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         data = json.loads(request.body)
-        comment_id = data.get('comment_id')
+        comment_id = data.get("comment_id")
         try:
             comment = Comment.objects.get(id=comment_id, user=request.user)
             comment.delete()
-            return JsonResponse({'success': True})
+            return JsonResponse({"success": True})
         except Exception:
-            return JsonResponse({'success': False, 'error': 'Комментарий не найден или недоступен'})
-    return JsonResponse({'success': False, 'error': 'Некорректный метод'})
+            return JsonResponse(
+                {"success": False, "error": "Комментарий не найден или недоступен"}
+            )
+    return JsonResponse({"success": False, "error": "Некорректный метод"})
+
 
 # Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):
