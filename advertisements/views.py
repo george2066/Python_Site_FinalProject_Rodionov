@@ -7,6 +7,7 @@ from yookassa import Configuration, Payment
 
 
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -23,8 +24,9 @@ from django.views.generic import (
     TemplateView,
 )
 
+
 from advertisements.forms import CommentForm
-from advertisements.models import Advertisement, Transaction
+from advertisements.models import Advertisement, Transaction, Comment
 from diplom import settings
 from users.models import User
 
@@ -172,6 +174,20 @@ def approve_ad(request):
         os.path.join("advertisements", "advertisement_approve.html"),
         {"advertisements": advertisements},
     )
+
+@csrf_exempt
+@require_POST
+def edit_comment(request):
+    data = json.loads(request.body)
+    comment_id = data.get('comment_id')
+    comment_text = data.get('comment')
+    try:
+        comment = Comment.objects.get(id=comment_id, user=request.user)
+        comment.comment = comment_text
+        comment.save()
+        return JsonResponse({'success': True})
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Комментарий не найден или недоступен'})
 
 
 # Create your views here.

@@ -48,10 +48,99 @@
                     <small>({{ comment.create_at|date:"d.m.Y H:i" }})</small>
                 </p>
                 <p>{{ comment.comment }}</p>
+                <!-- Кнопка редактирования (только для автора комментария) -->
+                {% if request.user == comment.user %}
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary edit-comment-btn"
+                            data-comment-id="{{ comment.id }}"
+                            style="top: 10px; right: 10px;">
+                        Редактировать
+                    </button>
+                {% endif %}
+                <!-- Форма редактирования (скрыта по умолчанию) -->
+                <div class="edit-comment-form" style="display: none;">
+                    <form class="edit-comment-form-inner" data-comment-id="{{ comment.id }}">
+                        {% csrf_token %}
+                        <textarea name="comment" class="form-control">{{ comment.comment }}</textarea>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-sm btn-secondary cancel-edit">Отмена</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         {% empty %}
             <p>Пока нет комментариев.</p>
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчик клика по кнопке "Редактировать"
+    document.querySelectorAll('.edit-comment-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            const commentDiv = this.closest('.comment');
+            const formDiv = commentDiv.querySelector('.edit-comment-form');
+            // Скрываем все формы редактирования
+            document.querySelectorAll('.edit-comment-form').forEach(function(f) {
+                f.style.display = 'none';
+            });
+            // Показываем нужную форму
+            formDiv.style.display = 'block';
+        });
+    });
+
+    // Обработчик кнопки "Отмена"
+    document.querySelectorAll('.cancel-edit').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const formDiv = this.closest('.edit-comment-form');
+            formDiv.style.display = 'none';
+        });
+    });
+
+    // Обработка отправки формы редактирования
+    document.querySelectorAll('.edit-comment-form-inner').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const commentId = this.dataset.commentId;
+            const textarea = this.querySelector('textarea[name="comment"]');
+            const commentText = textarea.value;
+            const csrfToken = this.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            fetch("{% url 'edit_comment' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: JSON.stringify({
+                    'comment_id': commentId,
+                    'comment': commentText,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем текст комментария
+                    const commentDiv = this.closest('.comment');
+                    commentDiv.querySelector('p:nth-of-type(2)').innerText = commentText;
+                    // Скрываем форму
+                    commentDiv.querySelector('.edit-comment-form').style.display = 'none';
+                } else {
+                    alert('Ошибка при сохранении комментария');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка при сохранении комментария');
+            });
+        });
+    });
+});
+</script>
 {% endblock %}
