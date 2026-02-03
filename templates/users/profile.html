@@ -8,9 +8,11 @@
     <p>last_name: {{ object.last_name }}</p>
     <p>email: {{ object.email }}</p>
 </div>
-<p><input value="Add a new advertisement" type="button" onclick="location.href='{% url 'advertisement-add' %}'"/></p>
-<p><input value="Profile update" type="button" onclick="location.href='{% url 'profile-update' %}'"/></p>
-<p><input value="Profile delete" type="button" onclick="location.href='{% url 'profile-delete' %}'"/></p>
+
+<a href="{% url 'advertisement-add' %}" class="btn btn-secondary">Add a new advertisement</a>
+<a href="{% url 'profile-update' %}" class="btn btn-secondary">Profile update</a>
+<a href="{% url 'profile-delete' %}" class="btn btn-secondary">Profile delete</a>
+<p style="margin-top: 10px"><a href="{% url 'advertisements' %}" class="btn btn-secondary">Назад к списку</a></p>
 
 <hr>
 

@@ -6,7 +6,7 @@ from users import avatar_default
 
 # Create your models here.
 class User(AbstractUser):
-    image_url = models.URLField(max_length=200, default=avatar_default)
+    image_url = models.URLField(max_length=400, default=avatar_default)
     email = models.EmailField(unique=True, verbose_name="Адрес электронной почты")
 
     USERNAME_FIELD = "email"

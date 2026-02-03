@@ -9,6 +9,7 @@
         <p><strong>Категория:</strong> {{ object.category }}</p>
         <p><strong>Автор:</strong> {{ object.author.username }}</p>
         <p><strong>Описание:</strong> {{ object.description }}</p>
+        <p><strong>Статус:</strong> {% if object.sold %}Продано{% else %}Акивное объявление{% endif %}</p>
     </div>
     <!-- Кнопки действий -->
     <div class="actions">
