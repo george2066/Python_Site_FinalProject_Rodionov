@@ -23,7 +23,7 @@ from django.views.generic import (
     TemplateView,
 )
 
-from advertisements.forms import AdvertisementForm
+from advertisements.forms import CommentForm
 from advertisements.models import Advertisement, Transaction
 from diplom import settings
 from users.models import User
@@ -155,30 +155,23 @@ def approve_ad(request):
     advertisements = Advertisement.objects.filter(is_approved=False)
     advertisemtnts = advertisements.filter(sold=False)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         # Получаем список ID из чекбоксов (name="approve_ad")
-        approved_ids = request.POST.getlist('approve_ad')
+        approved_ids = request.POST.getlist("approve_ad")
 
         # Обновляем только выбранные объявления
         Advertisement.objects.filter(id__in=approved_ids).update(is_approved=True)
 
         # Добавляем сообщение об успехе (опционально)
-        messages.success(request, f'Одобрено {len(approved_ids)} объявлений.')
+        messages.success(request, f"Одобрено {len(approved_ids)} объявлений.")
 
-        return redirect('advertisements')  # Редирект на ту же страницу
+        return redirect("advertisements")  # Редирект на ту же страницу
 
-    return render(request, os.path.join('advertisements', 'advertisement_approve.html'), {'advertisements': advertisements})
-
-
-
-
-
-
-
-
-
-
-
+    return render(
+        request,
+        os.path.join("advertisements", "advertisement_approve.html"),
+        {"advertisements": advertisements},
+    )
 
 
 # Create your views here.
@@ -196,12 +189,40 @@ class AdvertisementDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         advertisement = self.object
+
+        # Добавляем данные объявления
         context["image"] = advertisement.image_url
         context["title"] = advertisement.title
         context["category"] = advertisement.category
         context["author_id"] = advertisement.author
         context["description"] = advertisement.description
+
+        # Форма для комментария
+        context["comment_form"] = CommentForm()
+
+        # Список комментариев к объявлению
+        context["comments"] = advertisement.comments.all().order_by("-create_at")
+
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.advertisement = self.object
+            comment.save()
+            return redirect(self.get_success_url())
+
+        # Если форма невалидна — возвращаем в контекст с ошибками
+        context = self.get_context_data()
+        context["comment_form"] = form
+        return self.render_to_response(context)
+
+    def get_success_url(self):
+        return reverse("advertisement", kwargs={"pk": self.object.pk})
 
 
 class AdvertisementCreateView(LoginRequiredMixin, CreateView):

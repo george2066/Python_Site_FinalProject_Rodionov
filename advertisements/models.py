@@ -6,6 +6,7 @@ from advertisements.managers import (
     CategoryManager,
     AdvertisementManager,
     TransactionManager,
+    CommentManager,
 )
 from users.models import User
 
@@ -91,3 +92,26 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"Транзакция от {self.transaction_date} на сумму {self.advertisement.__dict__['price']}"
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Автор",
+    )
+    advertisement = models.ForeignKey(
+        Advertisement,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Объявление",
+    )
+    comment = models.CharField(max_length=510)
+    create_at = models.DateTimeField(auto_now=True, verbose_name="Дата создания")
+    update_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    objects = CommentManager()
+
+    def __str__(self):
+        return f"Комментарий от пользователя {self.user.__str__()} к объявлению {self.advertisement.__str__()}"

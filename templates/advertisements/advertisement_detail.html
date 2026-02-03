@@ -1,27 +1,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<img src="{{ object.image_url }}" width="300" height="200" alt="image">
-<div>
-    <p>Title: {{ object.title }}        </p>
-    <p>Owner: {{ object.owner }}         </p>
-    <p>Category: {{ object.category }}     </p>
-    <p>Description: {{ object.description }}  </p>
+<div class="advertisement-detail">
+    <img src="{{ object.image_url }}" width="300" height="200" alt="Изображение объявления">
+
+    <div class="ad-info">
+        <h2>{{ object.title }}</h2>
+        <p><strong>Категория:</strong> {{ object.category }}</p>
+        <p><strong>Автор:</strong> {{ object.author.username }}</p>
+        <p><strong>Описание:</strong> {{ object.description }}</p>
+    </div>
+    <!-- Кнопки действий -->
+    <div class="actions">
+        {% if request.user == object.author %}
+            <a href="{% url 'advertisement-update' object.id %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+            <a href="{% url 'advertisement-delete' object.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+        {% else %}
+            <a href="{% url 'buy_advertisement' object.id %}" class="btn btn-primary">Купить</a>
+        {% endif %}
+
+        <a href="{% url 'advertisements' %}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+    <hr>
+    <!-- Форма комментария (только для авторизованных) -->
+    {% if user.is_authenticated %}
+        <div class="comment-form">
+            <h4>Оставить комментарий</h4>
+            <form method="post">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button type="submit" class="btn btn-primary">Отправить комментарий</button>
+            </form>
+        </div>
+    {% else %}
+        <p>
+            <a href="{% url 'account_login' %}">Войдите</a>, чтобы оставить комментарий.
+        </p>
+    {% endif %}
+
+    <!-- Список комментариев -->
+    <div class="comments">
+        <h4>Комментарии ({{ comments|length }})</h4>
+        {% for comment in comments %}
+            <div class="comment">
+                <p>
+                    <strong>{{ comment.user.username }}</strong>
+                    <small>({{ comment.create_at|date:"d.m.Y H:i" }})</small>
+                </p>
+                <p>{{ comment.comment }}</p>
+            </div>
+        {% empty %}
+            <p>Пока нет комментариев.</p>
+        {% endfor %}
+    </div>
 </div>
-{% if request.user == object.author %}
-<p>
-    <input value="Update advertisement" type="button" onclick="location.href='{% url "advertisement-update" object.id %}'"/>
-</p>
-<p>
-    <input value="Delete advertisement" type="button" onclick="location.href='{% url "advertisement-delete" object.id %}'"/>
-</p>
-{% else %}
-    <a
-        href="{% url 'buy_advertisement' advertisement.id %}"
-        class="btn btn-primary"
-    >
-        Купить
-    </a>
-{% endif %}
-<input value="Cancel" type="button" onclick="location.href='{% url "advertisements" %}'">
 {% endblock %}

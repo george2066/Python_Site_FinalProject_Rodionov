@@ -18,3 +18,7 @@ class CategoryManager(models.Manager):
 
 class TransactionManager(models.Manager):
     pass
+
+
+class CommentManager(models.Manager):
+    pass
