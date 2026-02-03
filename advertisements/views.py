@@ -204,6 +204,12 @@ def delete_comment(request):
             )
     return JsonResponse({"success": False, "error": "Некорректный метод"})
 
+def filter_advertisements():
+    advertisements = Advertisement.objects.all()
+    advertisements = advertisements.filter(sold=False)
+    advertisements = advertisements.filter(is_approved=True)
+    return advertisements
+
 
 # Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):
@@ -311,9 +317,7 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         # Получаем все объявления
-        advertisements = Advertisement.objects.all()
-        advertisements = advertisements.filter(sold=False)
-        advertisements = advertisements.filter(is_approved=True)
+        advertisements = filter_advertisements()
 
         # Настройка пагинации (10 объявлений на страницу)
         paginator = Paginator(advertisements, settings.PAGE_ENTITY)
@@ -337,9 +341,7 @@ class SearchResultsView(ListView):
         clear = self.request.GET.get("clear")
 
         if clear == "true":
-            advertisements = Advertisement.objects.all()
-            advertisements = advertisements.filter(sold=False)
-            advertisements = advertisements.filter(is_approved=True)
+            advertisements = filter_advertisements()
             return advertisements
 
         if query:
