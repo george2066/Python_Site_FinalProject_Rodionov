@@ -12,6 +12,7 @@ from advertisements.views import (
     payment_success,
     approve_ad,
     edit_comment,
+    delete_comment,
 )
 
 
@@ -47,4 +48,5 @@ urlpatterns = [
     path("ad/<int:ad_id>/buy/", buy_advertisement, name="buy_advertisement"),
     path("payment/success/", payment_success, name="payment_success"),
     path('comments/edit/', edit_comment, name='edit_comment'),
+    path('comments/delete/', delete_comment, name='delete_comment')
 ]

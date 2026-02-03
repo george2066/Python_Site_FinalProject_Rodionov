@@ -42,7 +42,7 @@
     <div class="comments">
         <h4>Комментарии ({{ comments|length }})</h4>
         {% for comment in comments %}
-            <div class="comment">
+            <div class="comment" style="border: 5px solid green; margin-bottom: 10px; padding: 10px; border-radius: 10px">
                 <p>
                     <strong>{{ comment.user.username }}</strong>
                     <small>({{ comment.create_at|date:"d.m.Y H:i" }})</small>
@@ -55,6 +55,12 @@
                             data-comment-id="{{ comment.id }}"
                             style="top: 10px; right: 10px;">
                         Редактировать
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger delete-comment-btn"
+                            data-comment-id="{{ comment.id }}"
+                            style="top: 10px; right: 10px; margin-left: 5px;">
+                        Удалить
                     </button>
                 {% endif %}
                 <!-- Форма редактирования (скрыта по умолчанию) -->
@@ -139,6 +145,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Ошибка:', error);
                 alert('Ошибка при сохранении комментария');
             });
+        });
+    });
+    // Обработчик для кнопки "Удалить"
+    document.querySelectorAll('.delete-comment-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const commentId = this.dataset.commentId;
+            if (confirm('Вы действительно хотите удалить этот комментарий?')) {
+                fetch("{% url 'delete_comment' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value,
+                    },
+                    body: JSON.stringify({ 'comment_id': commentId }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Удаляем комментарий из DOM
+                        const commentDiv = this.closest('.comment');
+                        commentDiv.remove();
+                    } else {
+                        alert('Не удалось удалить комментарий.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при удалении комментария.');
+                });
+            }
         });
     });
 });

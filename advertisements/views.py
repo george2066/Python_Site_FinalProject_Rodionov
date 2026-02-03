@@ -190,6 +190,19 @@ def edit_comment(request):
         return JsonResponse({'success': False, 'error': 'Комментарий не найден или недоступен'})
 
 
+@csrf_exempt
+def delete_comment(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        comment_id = data.get('comment_id')
+        try:
+            comment = Comment.objects.get(id=comment_id, user=request.user)
+            comment.delete()
+            return JsonResponse({'success': True})
+        except Exception:
+            return JsonResponse({'success': False, 'error': 'Комментарий не найден или недоступен'})
+    return JsonResponse({'success': False, 'error': 'Некорректный метод'})
+
 # Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("account_login")
