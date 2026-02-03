@@ -35,7 +35,7 @@
         </div>
     {% else %}
         <p>
-            <a href="{% url 'account_login' %}">Войдите</a>, чтобы оставить комментарий.
+            <a href="{% url 'login' %}">Войдите</a>, чтобы оставить комментарий.
         </p>
     {% endif %}
 
@@ -43,7 +43,7 @@
     <div class="comments">
         <h4>Комментарии ({{ comments|length }})</h4>
         {% for comment in comments %}
-            <div class="comment" style="border: 5px solid green; margin-bottom: 10px; padding: 10px; border-radius: 10px">
+            <div class="comment" style="border: 5px solid green; margin-bottom: 10px; padding: 10px; border-radius: 10px; position: relative;">
                 <p>
                     <strong>{{ comment.user.username }}</strong>
                     <small>({{ comment.create_at|date:"d.m.Y H:i" }})</small>

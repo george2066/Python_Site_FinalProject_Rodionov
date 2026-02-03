@@ -153,7 +153,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 # Pagination
 
-PAGE_ENTITY = 2
+PAGE_ENTITY = 20
 
 
 # Yookassa
