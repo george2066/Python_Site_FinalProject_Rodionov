@@ -4,15 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0004_alter_user_image_url'),
+        ("users", "0004_alter_user_image_url"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='image_url',
-            field=models.URLField(default='https://avatars.mds.yandex.net/i?id=0fd90d92e52c7578ff1dc85a83c746ab03ff955f-8177770-images-thumbs&n=13', max_length=400),
+            model_name="user",
+            name="image_url",
+            field=models.URLField(
+                default="https://avatars.mds.yandex.net/i?id=0fd90d92e52c7578ff1dc85a83c746ab03ff955f-8177770-images-thumbs&n=13",
+                max_length=400,
+            ),
         ),
     ]

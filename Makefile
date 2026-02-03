@@ -18,3 +18,4 @@ showmigrate:
 
 ruff:
 	ruff format .
+

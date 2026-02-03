@@ -32,7 +32,6 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("registration/", sign.register, name="register"),
     path("login/", sign.user_login, name="login"),
-    path("about/", views.about, name="about"),
     path("contact/", views.contact, name="contact"),
     path("", include("advertisements.urls")),
     path("", include("users.urls")),

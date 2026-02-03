@@ -43,10 +43,6 @@ def home(request):
     return render(request, "diplom/home.html", context)
 
 
-def about(request):
-    return render(request, "about.html")
-
-
 def contact(request):
     return render(request, "contact.html")
 
@@ -86,7 +82,7 @@ def buy_advertisement(request, ad_id):
 
     except Exception as e:
         messages.error(request, f"Ошибка при создании платежа: {e}")
-        return redirect("advertisement_detail", ad_id=ad_id)
+        return redirect("advertisement", ad_id=ad_id)
 
 
 def payment_success(request):
@@ -135,7 +131,7 @@ def payment_success(request):
 
     return render(
         request,
-        os.path.join("advertisements", "advertisement_list.html"),
+        os.path.join(TEMPLATE_DIR, "advertisement_list.html"),
         context,  # Передаём словарь, а не QuerySet
     )
 
@@ -171,7 +167,7 @@ def approve_ad(request):
 
     return render(
         request,
-        os.path.join("advertisements", "advertisement_approve.html"),
+        os.path.join(TEMPLATE_DIR, "advertisement_approve.html"),
         {"advertisements": advertisements},
     )
 
@@ -309,7 +305,7 @@ class AdvertisementUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class HomePageView(TemplateView):
-    template_name = os.path.join("advertisements", "advertisement_list.html")
+    template_name = os.path.join(TEMPLATE_DIR, "advertisement_list.html")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

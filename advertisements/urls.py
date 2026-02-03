@@ -44,7 +44,7 @@ urlpatterns = [
         AdvertisementUpdateView.as_view(),
         name="advertisement-update",
     ),
-    path("advertisements/approve", approve_ad, name="approve"),
+    path("advertisements/approve/", approve_ad, name="approve"),
     path("ad/<int:ad_id>/buy/", buy_advertisement, name="buy_advertisement"),
     path("payment/success/", payment_success, name="payment_success"),
     path("comments/edit/", edit_comment, name="edit_comment"),
