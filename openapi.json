@@ -414,6 +414,195 @@
         }
       ]
     },
+    "/comment/": {
+      "get": {
+        "operationId": "comment_list",
+        "description": "API для управления комментариями (CRUD).",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Comment"
+              }
+            }
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "post": {
+        "operationId": "comment_create",
+        "description": "API для управления комментариями (CRUD).",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "parameters": []
+    },
+    "/comment/my-comments/": {
+      "get": {
+        "operationId": "comment_my_comments",
+        "description": "Получить все комментарии текущего пользователя.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "A search term.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ordering",
+            "in": "query",
+            "description": "Which field to use when ordering the results.",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Comment"
+              }
+            }
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "parameters": []
+    },
+    "/comment/{id}/": {
+      "get": {
+        "operationId": "comment_read",
+        "description": "API для управления комментариями (CRUD).",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "put": {
+        "operationId": "comment_update",
+        "description": "API для управления комментариями (CRUD).",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "patch": {
+        "operationId": "comment_partial_update",
+        "description": "API для управления комментариями (CRUD).",
+        "parameters": [
+          {
+            "name": "data",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/Comment"
+            }
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "delete": {
+        "operationId": "comment_delete",
+        "description": "Удаление комментария с проверкой прав.",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "comment"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "A unique integer value identifying this comment.",
+          "required": true,
+          "type": "integer"
+        }
+      ]
+    },
     "/transaction/": {
       "get": {
         "operationId": "transaction_list",
@@ -952,6 +1141,47 @@
         }
       }
     },
+    "Comment": {
+      "required": [
+        "comment"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "ID",
+          "type": "integer",
+          "readOnly": true
+        },
+        "user": {
+          "title": "User",
+          "type": "string",
+          "readOnly": true
+        },
+        "advertisement": {
+          "title": "Advertisement",
+          "type": "integer",
+          "readOnly": true
+        },
+        "comment": {
+          "title": "Comment",
+          "type": "string",
+          "maxLength": 510,
+          "minLength": 1
+        },
+        "create_at": {
+          "title": "Create at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "update_at": {
+          "title": "Update at",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        }
+      }
+    },
     "Transaction": {
       "type": "object",
       "properties": {
@@ -1049,7 +1279,7 @@
           "title": "Image url",
           "type": "string",
           "format": "uri",
-          "maxLength": 200,
+          "maxLength": 400,
           "minLength": 1
         },
         "is_active": {
