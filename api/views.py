@@ -7,8 +7,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from advertisements.models import Category, Transaction, Advertisement, Comment
-from .serializers import CategorySerializer, TransactionSerializer, UserSerializer, AdvertisementSerializer, \
-    CommentSerializer
+from .serializers import (
+    CategorySerializer,
+    TransactionSerializer,
+    UserSerializer,
+    AdvertisementSerializer,
+    CommentSerializer,
+)
 
 User = get_user_model()
 
@@ -291,7 +296,9 @@ class CommentViewSet(ModelViewSet):
     ]
     search_fields = ["comment"]
     ordering_fields = ["create_at", "update_at"]
-    ordering = ["-create_at"]  # сортировка по умолчанию — по дате создания, newest first
+    ordering = [
+        "-create_at"
+    ]  # сортировка по умолчанию — по дате создания, newest first
 
     def get_permissions(self):
         """
@@ -323,7 +330,7 @@ class CommentViewSet(ModelViewSet):
         if request.user != instance.user and not request.user.is_staff:
             return Response(
                 {"detail": "Нет прав на удаление этого комментария."},
-                status=status.HTTP_403_FORBIDDEN
+                status=status.HTTP_403_FORBIDDEN,
             )
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)

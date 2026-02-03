@@ -265,12 +265,12 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'id',
-            'user',
-            'advertisement',
-            'comment',
-            'create_at',
-            'update_at',
+            "id",
+            "user",
+            "advertisement",
+            "comment",
+            "create_at",
+            "update_at",
         ]
 
     def validate_comment(self, value):
@@ -286,9 +286,9 @@ class CommentSerializer(serializers.ModelSerializer):
         Создание комментария с текущим пользователем и объявлением.
         Можно переопределить, если нужно автоматически присваивать user и advertisement.
         """
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['user'] = request.user
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            validated_data["user"] = request.user
             # Предположим, что advertisement передается в контексте или через параметры
             # Или можно оставить ее для установки в view
         return super().create(validated_data)

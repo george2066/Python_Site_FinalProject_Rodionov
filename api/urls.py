@@ -4,10 +4,12 @@ from .views import (
     AdvertisementViewSet,
     UserViewSet,
     CategoryViewSet,
-    TransactionViewSet, CommentViewSet,
+    TransactionViewSet,
+    CommentViewSet,
 )
 
 router = DefaultRouter()
+
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"category", CategoryViewSet, basename="category")
 router.register(r"advertisements", AdvertisementViewSet, basename="advertisement")
