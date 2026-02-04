@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth import get_user_model
 
 from rest_framework import status, filters
@@ -6,13 +8,13 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from advertisements.models import Category, Transaction, Advertisement, Comment
+from advertisements.models import Category, Transaction, Advertisement, Comment, Rent
 from .serializers import (
     CategorySerializer,
     TransactionSerializer,
     UserSerializer,
     AdvertisementSerializer,
-    CommentSerializer,
+    CommentSerializer, RentSerializer,
 )
 
 User = get_user_model()
@@ -341,6 +343,63 @@ class CommentViewSet(ModelViewSet):
         Получить все комментарии текущего пользователя.
         """
         queryset = self.filter_queryset(self.get_queryset().filter(user=request.user))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+class RentViewSet(ModelViewSet):
+    """
+    API для управления арендой (CRUD).
+    """
+
+    queryset = Rent.objects.all()
+    serializer_class = RentSerializer
+    filter_backends = [
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    search_fields = ["advertisement__title", "renter__username"]
+    ordering_fields = ["from_date", "to_date", "create_at"]
+    ordering = ["-create_at"]
+    pagination_class = None  # Можно подключить PageNumberPagination при необходимости
+
+    def get_permissions(self):
+        """
+        Права доступа:
+        - Создание/обновление/удаление: только админ.
+        - Чтение: все авторизованные пользователи.
+        """
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        """Дополнительная логика при создании (если нужна)"""
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """Дополнительная логика при обновлении (если нужна)"""
+        serializer.save()
+
+    def destroy(self, request, *args, **kwargs):
+        """Удаление аренды с проверкой"""
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+        except Exception as e:
+            return Response(
+                {"error": f"Не удалось удалить аренду: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="active")
+    def active_rents(self, request):
+        """Возвращает активные аренды (например, текущие по дате)"""
+        queryset = self.get_queryset().filter(to_date__gte=datetime.date.today())
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

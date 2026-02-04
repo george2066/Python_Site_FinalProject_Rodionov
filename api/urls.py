@@ -5,7 +5,7 @@ from .views import (
     UserViewSet,
     CategoryViewSet,
     TransactionViewSet,
-    CommentViewSet,
+    CommentViewSet, RentViewSet,
 )
 
 router = DefaultRouter()
@@ -15,6 +15,7 @@ router.register(r"category", CategoryViewSet, basename="category")
 router.register(r"advertisements", AdvertisementViewSet, basename="advertisement")
 router.register(r"transaction", TransactionViewSet, basename="transaction")
 router.register(r"comment", CommentViewSet, basename="comment")
+router.register(r"rent", RentViewSet, basename="rens")
 
 
 urlpatterns = [

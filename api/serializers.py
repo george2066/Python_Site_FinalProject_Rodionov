@@ -249,3 +249,33 @@ class CommentSerializer(serializers.ModelSerializer):
         Обновление комментария.
         """
         return super().update(instance, validated_data)
+
+
+class RentSerializer(serializers.ModelSerializer):
+    advertisement_id = serializers.PrimaryKeyRelatedField(
+        source='advertisement',
+        queryset=Advertisement.objects.all(),
+        read_only=False
+    )
+    renter_id = serializers.PrimaryKeyRelatedField(
+        source='renter',
+        queryset=User.objects.all(),
+        read_only=False
+    )
+    from_date = serializers.DateField(format="%Y-%m-%d")
+    to_date = serializers.DateField(format="%Y-%m-%d")
+    create_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+    update_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)
+
+    class Meta:
+        model = Rent
+        fields = [
+            'id',
+            'advertisement_id',
+            'renter_id',
+            'from_date',
+            'to_date',
+            'payed',
+            'create_at',
+            'update_at',
+        ]

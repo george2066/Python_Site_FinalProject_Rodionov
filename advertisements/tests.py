@@ -1,16 +1,19 @@
 import json
+from datetime import datetime
+
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 from unittest.mock import patch, MagicMock
 
 from advertisements.views import buy_rent
 from users.models import User
-from advertisements.models import Advertisement, Comment, Category
+from advertisements.models import Advertisement, Comment, Category, Location, Rent
 from django.utils import timezone
 
 
 # Create your tests here.
 class AdvertisementViewsTestCase(TestCase):
+    @classmethod
     def setUp(self):
         self.factory = RequestFactory()
         self.client = Client()
@@ -22,15 +25,31 @@ class AdvertisementViewsTestCase(TestCase):
         # Создаем категорию
         category = Category.objects.create(name="Test Category")
         # Создаём объявление
+        self.location = Location.objects.create(
+            city="Город",
+            street="Улица",
+            home="Дом",
+            apartment="Квартира",
+        )
         self.ad = Advertisement.objects.create(
             title="Test Ad",
             description="Test description",
             price=100,
-            category_id=1,  # укажите существующую категорию или создайте её в setUp
+            category_id=1,
+            location=self.location,
             author=self.user,
             image_url="http://example.com/image.jpg",
             is_approved=True,
             sold=False,
+        )
+        self.rent = Rent.objects.create(
+            advertisement=self.ad,
+            renter =self.user,
+            from_date=datetime(2023, 1, 1).date(),
+            to_date=datetime(2023, 2, 2).date(),
+            payed = False,
+            create_at = datetime.now(),
+            update_at =  datetime.now(),
         )
         self.client.login(username="admin", password="pass")
 
@@ -136,14 +155,14 @@ class AdvertisementViewsTestCase(TestCase):
             title="Ad1",
             description="description1",
             price=1000,
-            location="City1",
+            location=self.location,
             author=self.user,
         )
         ad2 = Advertisement.objects.create(
             title="Ad2",
             description="description2",
             price=2000,
-            location="City2",
+            location=self.location,
             author=self.user,
         )
         response = self.client.post(
@@ -167,7 +186,7 @@ class AdvertisementViewsTestCase(TestCase):
     @patch("yookassa.Payment.create")
     @patch("yookassa.Configuration.account_id", new_callable=property)
     @patch("yookassa.Configuration.secret_key", new_callable=property)
-    def test_buy_advertisement_success(
+    def test_buy_rent_success(
         self, mock_secret_key, mock_account_id, mock_create_payment
     ):
         # Настраиваем мок для Payment.create
@@ -177,12 +196,12 @@ class AdvertisementViewsTestCase(TestCase):
         mock_create_payment.return_value = mock_payment
 
         # Создаём запрос
-        request = self.factory.get(reverse("buy_advertisement", args=[self.ad.id]))
+        request = self.factory.get(reverse("buy_rent", args=[self.ad.id, self.rent.id]))
         request.user = self.user
         request.session = {}
 
         # Вызываем функцию
-        response = buy_rent(request, self.ad.id)
+        response = buy_rent(request, self.ad.id, self.rent.id)
 
         # Проверяем редирект на URL оплаты
         self.assertEqual(response.status_code, 302)

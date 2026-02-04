@@ -81,7 +81,7 @@ class Rent(models.Model):
     objects = RentManager()
 
     def __str__(self):
-        return f"Аренда  пользователя {self.кутеук.__str__()} к объявлению {self.advertisement}"
+        return f"Аренда  пользователя {self.renter.__str__()} к объявлению {self.advertisement}"
 
 
 class Transaction(models.Model):

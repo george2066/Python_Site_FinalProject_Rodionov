@@ -19,3 +19,17 @@ repos:
       "flake8-cognitive-complexity",
       "flake8-isort",
     ]
+
+- repo: local
+  hooks:
+    - id: ruff-fix
+      name: Fix code with ruff
+      entry: ruff check --fix
+      language: system
+      always_run: true
+
+    - id: run-tests
+      name: Run tests
+      entry: pytest
+      language: system
+      always_run: true
