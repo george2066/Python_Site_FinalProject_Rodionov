@@ -20,6 +20,13 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Location(models.Model):
+    city = models.CharField(max_length=255, verbose_name='Город')
+    street = models.CharField(max_length=255, verbose_name='Улица')
+    home = models.CharField(max_length=255, verbose_name='Дом')
+    apartment = models.CharField(max_length=255, verbose_name='Квартира')
+
+
 
 class Advertisement(models.Model):
     image_url = models.URLField(max_length=200, blank=True, null=True)
@@ -29,7 +36,7 @@ class Advertisement(models.Model):
     )
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    location = models.CharField(max_length=255, verbose_name="Местоположение")
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Локация')
     contact_phone = models.CharField(
         max_length=20, blank=True, verbose_name="Контактный телефон"
     )
@@ -47,6 +54,7 @@ class Advertisement(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
     is_active = models.BooleanField(default=True, verbose_name="Активно")
     is_approved = models.BooleanField(default=False)
+
 
     objects = AdvertisementManager()
 

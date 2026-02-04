@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import requests
 
 
 from yookassa import Configuration, Payment
@@ -26,7 +27,7 @@ from django.views.generic import (
 
 
 from advertisements.forms import CommentForm
-from advertisements.models import Advertisement, Transaction, Comment
+from advertisements.models import Advertisement, Transaction, Comment, Location
 from diplom import settings
 from users.models import User
 
@@ -271,11 +272,17 @@ class AdvertisementCreateView(LoginRequiredMixin, CreateView):
         "category",
         "description",
         "price",
-        "location",
     ]
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        # Создаем или обновляем Location
+        location = Location.objects.create(
+            city=form.cleaned_data.get('city', ''),
+            street=form.cleaned_data.get('street', ''),
+            home=form.cleaned_data.get('home', ''),
+        )
+        form.instance.location = location
         return super().form_valid(form)
 
     def get_success_url(self):

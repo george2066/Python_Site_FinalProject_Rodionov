@@ -2,11 +2,26 @@ from django import forms
 
 from advertisements.models import Advertisement, Comment
 
+'''
+Variant №1
+
+class AdvertisementForm(forms.ModelForm):
+    city = forms.CharField(max_length=255, required=False)
+    street = forms.CharField(max_length=255, required=False)
+    house = forms.CharField(max_length=255, required=False)
+
+    class Meta:
+        model = Advertisement
+        fields = ['image_url', 'title', 'category', 'description', 'price', 'location', 'city', 'street', 'house']
+'''
 
 class AdvertisementForm(forms.ModelForm):
     class Meta:
         model = Advertisement
-        fields = ["title", "image_url", "description"]
+        fields = ['image_url', 'title', 'category', 'description', 'price', 'location']
+        widgets = {
+            'location': forms.HiddenInput(),  # или отдельные поля для города, улицы, дома
+        }
 
 
 class CommentForm(forms.ModelForm):
