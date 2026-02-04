@@ -6,7 +6,7 @@ from advertisements.managers import (
     CategoryManager,
     AdvertisementManager,
     TransactionManager,
-    CommentManager,
+    CommentManager, RentManager, LocationManager,
 )
 from users.models import User
 
@@ -20,12 +20,14 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-class Location(models.Model):
-    city = models.CharField(max_length=255, verbose_name='Город')
-    street = models.CharField(max_length=255, verbose_name='Улица')
-    home = models.CharField(max_length=255, verbose_name='Дом')
-    apartment = models.CharField(max_length=255, verbose_name='Квартира')
 
+class Location(models.Model):
+    city = models.CharField(max_length=255, verbose_name="Город")
+    street = models.CharField(max_length=255, verbose_name="Улица")
+    home = models.CharField(max_length=255, verbose_name="Дом")
+    apartment = models.CharField(max_length=255, verbose_name="Квартира")
+
+    objects = LocationManager()
 
 
 class Advertisement(models.Model):
@@ -36,7 +38,9 @@ class Advertisement(models.Model):
     )
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name='Локация')
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, verbose_name="Локация"
+    )
     contact_phone = models.CharField(
         max_length=20, blank=True, verbose_name="Контактный телефон"
     )
@@ -55,7 +59,6 @@ class Advertisement(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активно")
     is_approved = models.BooleanField(default=False)
 
-
     objects = AdvertisementManager()
 
     class Meta:
@@ -66,26 +69,32 @@ class Advertisement(models.Model):
     def __str__(self):
         return self.title
 
+class Rent(models.Model):
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, verbose_name='Объявление')
+    renter = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Съёмщик', related_name='related_renter')
+    from_date = models.DateField(verbose_name="Начало аренды")
+    to_date = models.DateField(verbose_name="Окончание аренды")
+    payed = models.BooleanField(default=False)
+    create_at = models.DateTimeField(auto_now=True, verbose_name="Дата создания")
+    update_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    objects = RentManager()
+
+    def __str__(self):
+        return f"Аренда  пользователя {self.кутеук.__str__()} к объявлению {self.advertisement}"
+
 
 class Transaction(models.Model):
     transaction_date = models.DateTimeField(
         auto_now_add=True, verbose_name="Дата транзакции"
     )
-    user = models.ForeignKey(
-        User,
+    rent = models.ForeignKey(
+        Rent,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="transactions",
-        verbose_name="Пользователь",
-    )
-    advertisement = models.ForeignKey(
-        Advertisement,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="transactions",
-        verbose_name="Объявление",
+        verbose_name="Аренда",
     )
     created_at = models.DateTimeField(
         verbose_name="Дата создания", default=datetime.datetime.now()
@@ -123,3 +132,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Комментарий от пользователя {self.user.__str__()} к объявлению {self.advertisement.__str__()}"
+

@@ -1,8 +1,8 @@
 from django import forms
 
-from advertisements.models import Advertisement, Comment
+from advertisements.models import Advertisement, Comment, Rent
 
-'''
+"""
 Variant №1
 
 class AdvertisementForm(forms.ModelForm):
@@ -13,14 +13,15 @@ class AdvertisementForm(forms.ModelForm):
     class Meta:
         model = Advertisement
         fields = ['image_url', 'title', 'category', 'description', 'price', 'location', 'city', 'street', 'house']
-'''
+"""
+
 
 class AdvertisementForm(forms.ModelForm):
     class Meta:
         model = Advertisement
-        fields = ['image_url', 'title', 'category', 'description', 'price', 'location']
+        fields = ["image_url", "title", "category", "description", "price", "location"]
         widgets = {
-            'location': forms.HiddenInput(),  # или отдельные поля для города, улицы, дома
+            "location": forms.HiddenInput(),  # или отдельные поля для города, улицы, дома
         }
 
 
@@ -40,3 +41,12 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ["comment"]
+
+class RentForm(forms.ModelForm):
+    class Meta:
+        model = Rent
+        fields = ['from_date', 'to_date']
+        widgets = {
+            'from_date': forms.DateInput(attrs={'type': 'date'}),
+            'to_date': forms.DateInput(attrs={'type': 'date'}),
+        }

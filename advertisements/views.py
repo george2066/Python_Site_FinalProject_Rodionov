@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import requests
+from datetime import timedelta
 
 
 from yookassa import Configuration, Payment
@@ -9,6 +10,7 @@ from yookassa import Configuration, Payment
 
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -26,8 +28,8 @@ from django.views.generic import (
 )
 
 
-from advertisements.forms import CommentForm
-from advertisements.models import Advertisement, Transaction, Comment, Location
+from advertisements.forms import CommentForm, RentForm
+from advertisements.models import Advertisement, Transaction, Comment, Location, Rent
 from diplom import settings
 from users.models import User
 
@@ -48,7 +50,7 @@ def contact(request):
     return render(request, "contact.html")
 
 
-def buy_advertisement(request, ad_id):
+def buy_rent(request, ad_id, rent_id):
     # Получаем объявление
     advertisement = get_object_or_404(Advertisement, id=ad_id)
 
@@ -76,7 +78,9 @@ def buy_advertisement(request, ad_id):
         payment = Payment.create(payment_data)
 
         # Сохраняем ID платежа в сессии (для проверки позже)
+        request.session['advertisement_id'] = ad_id
         request.session["payment_id"] = payment.id
+        request.session["rent_id"] = rent_id
 
         # Переводим пользователя на страницу оплаты
         return redirect(payment.confirmation.confirmation_url)
@@ -88,52 +92,62 @@ def buy_advertisement(request, ad_id):
 
 def payment_success(request):
     payment_id = request.session.get("payment_id")
+    rent_id = request.session.get("rent_id")
+    advertisement_id = request.session.get("advrtisement_id")
+
     if not payment_id:
         messages.error(request, "Платёж не найден.")
         return redirect("home")
 
     try:
-        # Проверяем статус платежа через API
         payment = Payment.find_one(payment_id)
 
         if payment.status == "succeeded":
-            # Получаем metadata из платежа
             metadata = payment.metadata
             advertisement_id = metadata.get("advertisement_id")
-            user_id = metadata.get("user_id")
+            rent_id_from_metadata = metadata.get("rent_id")  # Можно использовать, если есть
+            advertisement_id_from_metadata = metadata.get("advertisement_id")  # Можно использовать, если есть
 
-            # Получаем объекты из БД
-            advertisement = get_object_or_404(Advertisement, id=advertisement_id)
-            user = get_object_or_404(User, id=user_id)
+            # Или использовать rent_id из сессии
+            rent_id_to_use = rent_id or rent_id_from_metadata
+            advertisement_id_to_use = advertisement_id or advertisement_id_from_metadata
+
+            # Обновляем объявление
+            advertisement = get_object_or_404(Advertisement, id=advertisement_id_to_use)
             advertisement.sold = True
             advertisement.save()
-            # Создаём транзакцию
-            transaction = Transaction.objects.create(
-                user=user, advertisement=advertisement
-            )
+
+            # Обновляем аренду
+            rent = get_object_or_404(Rent, id=rent_id_to_use)
+            rent.payed = True
+            rent.save()
+
+            # Создаем транзакцию
+            transaction = Transaction.objects.create(rent=rent)
 
             messages.success(
                 request, f"Оплата прошла успешно! ID транзакции: {transaction.id}"
             )
         else:
             messages.error(request, f"Платёж не завершён (статус: {payment.status})")
-
     except Exception as e:
         logger.error(f"Ошибка при обработке платежа {payment_id}: {e}")
         messages.error(request, f"Ошибка проверки платежа: {e}")
 
-    # Очищаем session после обработки
+    # Очистка сессии
     if "payment_id" in request.session:
         del request.session["payment_id"]
+    if "rent_id" in request.session:
+        del request.session["rent_id"]
 
-    # Формируем контекст для шаблона
+    # возвращает список объявлений или другую страницу
     advertisements = Advertisement.objects.all()
     context = {"advertisements": advertisements}
 
     return render(
         request,
         os.path.join(TEMPLATE_DIR, "advertisement_list.html"),
-        context,  # Передаём словарь, а не QuerySet
+        context,
     )
 
 
@@ -359,3 +373,30 @@ class SearchResultsView(ListView):
         context = super().get_context_data(**kwargs)
         context["query"] = self.request.GET.get("q", "")
         return context
+
+
+
+class RentCreateView(CreateView):
+    model = Rent
+    form_class = RentForm
+    template_name = os.path.join(TEMPLATE_DIR, "advertisement_rent_form.html")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['advertisement'] = Advertisement.objects.get(pk=self.kwargs['ad_id'])
+        return context
+
+    def form_valid(self, form):
+        # Устанавливаем связь с объявлением
+        ad_id = self.kwargs['ad_id']
+        advertisement = Advertisement.objects.get(pk=ad_id)
+        form.instance.advertisement = advertisement
+        form.instance.renter = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # После сохранения аренды перенаправляем на страницу оплаты
+        return reverse('buy_rent', kwargs={
+            'ad_id': self.object.advertisement.id,
+            'rent_id': self.object.id
+        })

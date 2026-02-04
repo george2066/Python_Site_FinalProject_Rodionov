@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Объявление: {{ advertisement.title }}</h2>
+    <img src="{{ advertisement.image_url }}" width="300" height="200" alt="Изображение объявления">
+    <!-- Вывод полного объявления -->
+    <p><strong>Категория:</strong> {{ advertisement.category }}</p>
+    <p><strong>Описание:</strong> {{ advertisement.description }}</p>
+    <p><strong>Цена:</strong> {{ advertisement.price }}</p>
+    <p><strong>Локация:</strong> {{ advertisement.location.city }}, {{ advertisement.location.street }}, {{ advertisement.location.home }}, {{ advertisement.location.apartment }}</p>
+
+    <!-- Вставляем скрытые поля для локации -->
+    <input type="hidden" name="city" value="{{ advertisement.location.city }}">
+    <input type="hidden" name="street" value="{{ advertisement.location.street }}">
+    <input type="hidden" name="home" value="{{ advertisement.location.home }}">
+    <input type="hidden" name="apartment" value="{{ advertisement.location.apartment }}">
+<h2>Аренда для объявления: {{ advertisement.title }}</h2>
+<form method="post" action="{% url 'rent_create' ad_id=advertisement.id %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Арендовать</button>
+</form>
+{% endblock %}

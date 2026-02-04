@@ -22,3 +22,9 @@ class TransactionManager(models.Manager):
 
 class CommentManager(models.Manager):
     pass
+
+class RentManager(models.Manager):
+    pass
+
+class LocationManager(models.Manager):
+    pass

@@ -5,23 +5,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0009_location_remove_advertisement_latitude_and_more'),
+        ("advertisements", "0009_location_remove_advertisement_latitude_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='location',
-            name='latitude',
+            model_name="location",
+            name="latitude",
         ),
         migrations.RemoveField(
-            model_name='location',
-            name='longitude',
+            model_name="location",
+            name="longitude",
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 4, 15, 59, 53, 537947), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 4, 15, 59, 53, 537947),
+                verbose_name="Дата создания",
+            ),
         ),
     ]

@@ -5,25 +5,39 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0007_alter_transaction_created_at'),
+        ("advertisements", "0007_alter_transaction_created_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='advertisement',
-            name='latitude',
-            field=models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True, verbose_name='Широта'),
+            model_name="advertisement",
+            name="latitude",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=6,
+                max_digits=9,
+                null=True,
+                verbose_name="Широта",
+            ),
         ),
         migrations.AddField(
-            model_name='advertisement',
-            name='longitude',
-            field=models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True, verbose_name='Долгота'),
+            model_name="advertisement",
+            name="longitude",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=6,
+                max_digits=9,
+                null=True,
+                verbose_name="Долгота",
+            ),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 4, 13, 26, 16, 64555), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 4, 13, 26, 16, 64555),
+                verbose_name="Дата создания",
+            ),
         ),
     ]

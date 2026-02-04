@@ -3,10 +3,11 @@ from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 from unittest.mock import patch, MagicMock
 
-from advertisements.views import buy_advertisement
+from advertisements.views import buy_rent
 from users.models import User
 from advertisements.models import Advertisement, Comment, Category
 from django.utils import timezone
+
 
 # Create your tests here.
 class AdvertisementViewsTestCase(TestCase):
@@ -181,7 +182,7 @@ class AdvertisementViewsTestCase(TestCase):
         request.session = {}
 
         # Вызываем функцию
-        response = buy_advertisement(request, self.ad.id)
+        response = buy_rent(request, self.ad.id)
 
         # Проверяем редирект на URL оплаты
         self.assertEqual(response.status_code, 302)
