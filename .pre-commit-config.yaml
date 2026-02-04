@@ -3,7 +3,7 @@ repos:
     hooks:
     -   id: run-tests
         name: Run tests before commit
-        entry: pytest
+        entry: python manage.py test
         language: system
         pass_filenames: false
         always_run: true
