@@ -5,19 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0015_alter_rent_from_date_alter_rent_to_date_and_more'),
+        ("advertisements", "0015_alter_rent_from_date_alter_rent_to_date_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='rent',
-            name='landlord',
+            model_name="rent",
+            name="landlord",
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 4, 19, 37, 27, 472671), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 4, 19, 37, 27, 472671),
+                verbose_name="Дата создания",
+            ),
         ),
     ]

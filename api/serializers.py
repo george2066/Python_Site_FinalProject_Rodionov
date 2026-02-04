@@ -182,9 +182,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     rent_id = serializers.PrimaryKeyRelatedField(
-        source='rent',
-        queryset=Rent.objects.all(),
-        read_only=False
+        source="rent", queryset=Rent.objects.all(), read_only=False
     )
     transaction_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
@@ -193,11 +191,11 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = [
-            'id',
-            'transaction_date',
-            'rent_id',
-            'created_at',
-            'advertisement_price',
+            "id",
+            "transaction_date",
+            "rent_id",
+            "created_at",
+            "advertisement_price",
         ]
 
     def get_advertisement_price(self, obj):
@@ -253,14 +251,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class RentSerializer(serializers.ModelSerializer):
     advertisement_id = serializers.PrimaryKeyRelatedField(
-        source='advertisement',
-        queryset=Advertisement.objects.all(),
-        read_only=False
+        source="advertisement", queryset=Advertisement.objects.all(), read_only=False
     )
     renter_id = serializers.PrimaryKeyRelatedField(
-        source='renter',
-        queryset=User.objects.all(),
-        read_only=False
+        source="renter", queryset=User.objects.all(), read_only=False
     )
     from_date = serializers.DateField(format="%Y-%m-%d")
     to_date = serializers.DateField(format="%Y-%m-%d")
@@ -270,12 +264,12 @@ class RentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rent
         fields = [
-            'id',
-            'advertisement_id',
-            'renter_id',
-            'from_date',
-            'to_date',
-            'payed',
-            'create_at',
-            'update_at',
+            "id",
+            "advertisement_id",
+            "renter_id",
+            "from_date",
+            "to_date",
+            "payed",
+            "create_at",
+            "update_at",
         ]

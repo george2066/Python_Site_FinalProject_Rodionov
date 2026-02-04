@@ -14,7 +14,8 @@ from .serializers import (
     TransactionSerializer,
     UserSerializer,
     AdvertisementSerializer,
-    CommentSerializer, RentSerializer,
+    CommentSerializer,
+    RentSerializer,
 )
 
 User = get_user_model()
@@ -349,6 +350,7 @@ class CommentViewSet(ModelViewSet):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
 
 class RentViewSet(ModelViewSet):
     """

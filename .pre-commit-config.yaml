@@ -1,35 +1,35 @@
 repos:
-- repo: https://github.com/george2066/Python_Site_FinalProject_Rodionov.git
-  rev: 6.0.0
-  hooks:
-  - id: flake8
-    args: [
-      "--ignore=E501"
-    ]
-    additional-dependencies: [
-      "flake8-django",
-      "flake8-todo",
-      "flake8-variables-names",
-      "flake8-commas",
-      "pep8-naming",
-      "flake8-bugbear",
-      "flake8-builtins",
-      "flake8-quotes",
-      "pre-commit",
-      "flake8-cognitive-complexity",
-      "flake8-isort",
-    ]
+-   repo: local
+    hooks:
+    -   id: run-tests
+        name: Run tests before commit
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
 
-- repo: local
-  hooks:
-    - id: ruff-fix
-      name: Fix code with ruff
-      entry: ruff check --fix
-      language: system
-      always_run: true
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
 
-    - id: run-tests
-      name: Run tests
-      entry: pytest
-      language: system
-      always_run: true
+-   repo: https://github.com/george2066/Python_Site_FinalProject_Rodionov.git
+    rev: 6.0.0
+    hooks:
+    -   id: flake8
+        args: ["--ignore=E501"]
+        additional-dependencies:
+            - flake8-django
+            - flake8-todo
+            - flake8-variables-names
+            - flake8-commas
+            - pep8-naming
+            - flake8-bugbear
+            - flake8-builtins
+            - flake8-quotes
+            - pre-commit
+            - flake8-cognitive-complexity
+            - flake8-isort

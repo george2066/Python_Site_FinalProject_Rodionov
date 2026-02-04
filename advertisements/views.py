@@ -78,7 +78,7 @@ def buy_rent(request, ad_id, rent_id):
         payment = Payment.create(payment_data)
 
         # Сохраняем ID платежа в сессии (для проверки позже)
-        request.session['advertisement_id'] = ad_id
+        request.session["advertisement_id"] = ad_id
         request.session["payment_id"] = payment.id
         request.session["rent_id"] = rent_id
 
@@ -105,8 +105,12 @@ def payment_success(request):
         if payment.status == "succeeded":
             metadata = payment.metadata
             advertisement_id = metadata.get("advertisement_id")
-            rent_id_from_metadata = metadata.get("rent_id")  # Можно использовать, если есть
-            advertisement_id_from_metadata = metadata.get("advertisement_id")  # Можно использовать, если есть
+            rent_id_from_metadata = metadata.get(
+                "rent_id"
+            )  # Можно использовать, если есть
+            advertisement_id_from_metadata = metadata.get(
+                "advertisement_id"
+            )  # Можно использовать, если есть
 
             # Или использовать rent_id из сессии
             rent_id_to_use = rent_id or rent_id_from_metadata
@@ -219,6 +223,7 @@ def delete_comment(request):
             )
     return JsonResponse({"success": False, "error": "Некорректный метод"})
 
+
 def filter_advertisements():
     advertisements = Advertisement.objects.all()
     advertisements = advertisements.filter(sold=False)
@@ -292,9 +297,9 @@ class AdvertisementCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         # Создаем или обновляем Location
         location = Location.objects.create(
-            city=form.cleaned_data.get('city', ''),
-            street=form.cleaned_data.get('street', ''),
-            home=form.cleaned_data.get('home', ''),
+            city=form.cleaned_data.get("city", ""),
+            street=form.cleaned_data.get("street", ""),
+            home=form.cleaned_data.get("home", ""),
         )
         form.instance.location = location
         return super().form_valid(form)
@@ -375,7 +380,6 @@ class SearchResultsView(ListView):
         return context
 
 
-
 class RentCreateView(CreateView):
     model = Rent
     form_class = RentForm
@@ -383,12 +387,12 @@ class RentCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['advertisement'] = Advertisement.objects.get(pk=self.kwargs['ad_id'])
+        context["advertisement"] = Advertisement.objects.get(pk=self.kwargs["ad_id"])
         return context
 
     def form_valid(self, form):
         # Устанавливаем связь с объявлением
-        ad_id = self.kwargs['ad_id']
+        ad_id = self.kwargs["ad_id"]
         advertisement = Advertisement.objects.get(pk=ad_id)
         form.instance.advertisement = advertisement
         form.instance.renter = self.request.user
@@ -396,7 +400,7 @@ class RentCreateView(CreateView):
 
     def get_success_url(self):
         # После сохранения аренды перенаправляем на страницу оплаты
-        return reverse('buy_rent', kwargs={
-            'ad_id': self.object.advertisement.id,
-            'rent_id': self.object.id
-        })
+        return reverse(
+            "buy_rent",
+            kwargs={"ad_id": self.object.advertisement.id, "rent_id": self.object.id},
+        )

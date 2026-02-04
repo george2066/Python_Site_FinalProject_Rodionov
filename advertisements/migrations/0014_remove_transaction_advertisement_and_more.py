@@ -6,28 +6,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0013_rename_from_data_rent_from_date_and_more'),
+        ("advertisements", "0013_rename_from_data_rent_from_date_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='transaction',
-            name='advertisement',
+            model_name="transaction",
+            name="advertisement",
         ),
         migrations.RemoveField(
-            model_name='transaction',
-            name='user',
+            model_name="transaction",
+            name="user",
         ),
         migrations.AddField(
-            model_name='transaction',
-            name='rent',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='transactions', to='advertisements.rent', verbose_name='Аренда'),
+            model_name="transaction",
+            name="rent",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="transactions",
+                to="advertisements.rent",
+                verbose_name="Аренда",
+            ),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 4, 19, 17, 2, 934059), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 4, 19, 17, 2, 934059),
+                verbose_name="Дата создания",
+            ),
         ),
     ]

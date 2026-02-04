@@ -6,7 +6,9 @@ from advertisements.managers import (
     CategoryManager,
     AdvertisementManager,
     TransactionManager,
-    CommentManager, RentManager, LocationManager,
+    CommentManager,
+    RentManager,
+    LocationManager,
 )
 from users.models import User
 
@@ -69,9 +71,17 @@ class Advertisement(models.Model):
     def __str__(self):
         return self.title
 
+
 class Rent(models.Model):
-    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, verbose_name='Объявление')
-    renter = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Съёмщик', related_name='related_renter')
+    advertisement = models.ForeignKey(
+        Advertisement, on_delete=models.CASCADE, verbose_name="Объявление"
+    )
+    renter = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Съёмщик",
+        related_name="related_renter",
+    )
     from_date = models.DateField(verbose_name="Начало аренды")
     to_date = models.DateField(verbose_name="Окончание аренды")
     payed = models.BooleanField(default=False)
@@ -132,4 +142,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Комментарий от пользователя {self.user.__str__()} к объявлению {self.advertisement.__str__()}"
-

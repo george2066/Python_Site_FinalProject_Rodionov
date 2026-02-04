@@ -42,11 +42,12 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ["comment"]
 
+
 class RentForm(forms.ModelForm):
     class Meta:
         model = Rent
-        fields = ['from_date', 'to_date']
+        fields = ["from_date", "to_date"]
         widgets = {
-            'from_date': forms.DateInput(attrs={'type': 'date'}),
-            'to_date': forms.DateInput(attrs={'type': 'date'}),
+            "from_date": forms.DateInput(attrs={"type": "date"}),
+            "to_date": forms.DateInput(attrs={"type": "date"}),
         }

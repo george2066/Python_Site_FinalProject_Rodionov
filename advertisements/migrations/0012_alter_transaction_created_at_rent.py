@@ -7,29 +7,74 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0011_rename_hone_location_home_and_more'),
+        ("advertisements", "0011_rename_hone_location_home_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 4, 17, 42, 33, 501437), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 4, 17, 42, 33, 501437),
+                verbose_name="Дата создания",
+            ),
         ),
         migrations.CreateModel(
-            name='Rent',
+            name="Rent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('from_data', models.DateField(auto_now=True, verbose_name='Начало аренды')),
-                ('to_data', models.DateField(auto_now=True, verbose_name='Окончание аренды')),
-                ('create_at', models.DateTimeField(auto_now=True, verbose_name='Дата создания')),
-                ('update_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('advertisement', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='advertisements.advertisement', verbose_name='Объявление')),
-                ('landlord', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='related_landlord', to=settings.AUTH_USER_MODEL, verbose_name='Арендодатель')),
-                ('renter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='related_renter', to=settings.AUTH_USER_MODEL, verbose_name='Съёмщик')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "from_data",
+                    models.DateField(auto_now=True, verbose_name="Начало аренды"),
+                ),
+                (
+                    "to_data",
+                    models.DateField(auto_now=True, verbose_name="Окончание аренды"),
+                ),
+                (
+                    "create_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата создания"),
+                ),
+                (
+                    "update_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "advertisement",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="advertisements.advertisement",
+                        verbose_name="Объявление",
+                    ),
+                ),
+                (
+                    "landlord",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="related_landlord",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Арендодатель",
+                    ),
+                ),
+                (
+                    "renter",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="related_renter",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Съёмщик",
+                    ),
+                ),
             ],
         ),
     ]

@@ -46,7 +46,11 @@ urlpatterns = [
         name="advertisement-update",
     ),
     path("advertisements/approve/", approve_ad, name="approve"),
-    path('advertisement/<int:ad_id>/rent/add/', RentCreateView.as_view(), name='rent_create'),
+    path(
+        "advertisement/<int:ad_id>/rent/add/",
+        RentCreateView.as_view(),
+        name="rent_create",
+    ),
     path("advertisement/<int:ad_id>/<int:rent_id>/buy/", buy_rent, name="buy_rent"),
     path("payment/success/", payment_success, name="payment_success"),
     path("comments/edit/", edit_comment, name="edit_comment"),

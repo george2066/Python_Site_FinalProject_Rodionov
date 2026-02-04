@@ -5,25 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('advertisements', '0014_remove_transaction_advertisement_and_more'),
+        ("advertisements", "0014_remove_transaction_advertisement_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='rent',
-            name='from_date',
-            field=models.DateField(verbose_name='Начало аренды'),
+            model_name="rent",
+            name="from_date",
+            field=models.DateField(verbose_name="Начало аренды"),
         ),
         migrations.AlterField(
-            model_name='rent',
-            name='to_date',
-            field=models.DateField(verbose_name='Окончание аренды'),
+            model_name="rent",
+            name="to_date",
+            field=models.DateField(verbose_name="Окончание аренды"),
         ),
         migrations.AlterField(
-            model_name='transaction',
-            name='created_at',
-            field=models.DateTimeField(default=datetime.datetime(2026, 2, 4, 19, 23, 31, 80294), verbose_name='Дата создания'),
+            model_name="transaction",
+            name="created_at",
+            field=models.DateTimeField(
+                default=datetime.datetime(2026, 2, 4, 19, 23, 31, 80294),
+                verbose_name="Дата создания",
+            ),
         ),
     ]

@@ -44,12 +44,12 @@ class AdvertisementViewsTestCase(TestCase):
         )
         self.rent = Rent.objects.create(
             advertisement=self.ad,
-            renter =self.user,
+            renter=self.user,
             from_date=datetime(2023, 1, 1).date(),
             to_date=datetime(2023, 2, 2).date(),
-            payed = False,
-            create_at = datetime.now(),
-            update_at =  datetime.now(),
+            payed=False,
+            create_at=datetime.now(),
+            update_at=datetime.now(),
         )
         self.client.login(username="admin", password="pass")
 

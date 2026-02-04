@@ -5,7 +5,8 @@ from .views import (
     UserViewSet,
     CategoryViewSet,
     TransactionViewSet,
-    CommentViewSet, RentViewSet,
+    CommentViewSet,
+    RentViewSet,
 )
 
 router = DefaultRouter()
