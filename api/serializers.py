@@ -3,7 +3,7 @@ from rest_framework import serializers
 from users.models import User
 from django.core.validators import validate_email
 
-from advertisements.models import Advertisement, Category, Transaction, Comment
+from advertisements.models import Advertisement, Category, Transaction, Comment, Rent
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):
@@ -181,79 +181,30 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    # Дополнительные читаемые поля с информацией из связанных объектов
-    user_username = serializers.CharField(
-        source="user.username", read_only=True, allow_null=True
+    rent_id = serializers.PrimaryKeyRelatedField(
+        source='rent',
+        queryset=Rent.objects.all(),
+        read_only=False
     )
-    user_email = serializers.EmailField(
-        source="user.email", read_only=True, allow_null=True
-    )
-    advertisement_title = serializers.CharField(
-        source="advertisement.title", read_only=True, allow_null=True
-    )
-    advertisement_price = serializers.DecimalField(
-        source="advertisement.price",
-        read_only=True,
-        max_digits=10,
-        decimal_places=2,
-        allow_null=True,
-    )
+    transaction_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    advertisement_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Transaction
         fields = [
-            "id",
-            "transaction_date",
-            "user",
-            "user_username",
-            "user_email",
-            "advertisement",
-            "advertisement_title",
-            "advertisement_price",
-            "created_at",
-        ]
-        read_only_fields = [
-            "transaction_date",
-            "created_at",
-            "user_username",
-            "user_email",
-            "advertisement_title",
-            "advertisement_price",
+            'id',
+            'transaction_date',
+            'rent_id',
+            'created_at',
+            'advertisement_price',
         ]
 
-    def validate(self, data):
-        """
-        Общая валидация данных перед сохранением.
-        Проверяем, что user и advertisement существуют и корректны.
-        """
-        user = data.get("user")
-        advertisement = data.get("advertisement")
-
-        if user is None:
-            raise serializers.ValidationError(
-                {"user": "Поле user не может быть пустым."}
-            )
-
-        if advertisement is None:
-            raise serializers.ValidationError(
-                {"advertisement": "Поле advertisement не может быть пустым."}
-            )
-
-        return data
-
-    def create(self, validated_data):
-        """
-        Создание транзакции.
-        Можно добавить дополнительную логику (например, проверку статуса объявления).
-        """
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        """
-        Обновление транзакции.
-        Обычно транзакции не редактируются, но метод оставлен для гибкости.
-        """
-        return super().update(instance, validated_data)
+    def get_advertisement_price(self, obj):
+        # Получение цены из связанной аренды через rent
+        if obj.rent and obj.rent.advertisement:
+            return obj.rent.advertisement.price
+        return None
 
 
 class CommentSerializer(serializers.ModelSerializer):
