@@ -13,7 +13,7 @@ repos:
           entry: black
           language: system
           types: [python]
-          args: [--line-length=200, --target-version=py37]
+          args: [--line-length=200, --target-version=py311]
 
         - id: autoflake
           name: autoflake
@@ -34,7 +34,7 @@ repos:
           entry: reorder-python-imports
           language: system
           types: [python]
-          args: [--py37-plus]
+          args: [--py311-plus]
 
         - id: yesqa
           name: yesqa
