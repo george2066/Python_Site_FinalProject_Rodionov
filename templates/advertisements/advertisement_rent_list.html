@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Список аренды{% endblock %}
+
+{% block content %}
+<h1>Мои аренды</h1>
+
+{% if object_list %}
+    <table>
+        <thead>
+            <tr>
+                <th>Начало аренды</th>
+                <th>Окончание аренды</th>
+                <th>Статус просрочки</th>
+                <th>Объявление</th>
+                <!-- добавьте другие поля по необходимости -->
+            </tr>
+        </thead>
+        <tbody>
+        {% for rent in object_list %}
+            <tr>
+                <td>{{ rent.from_date }}</td>
+                <td>{{ rent.to_date }}</td>
+                <td>
+                    {% if rent.overdue %}
+                        <span style="color: red;">Просрочено</span>
+                    {% else %}
+                        Не просрочено
+                    {% endif %}
+                </td>
+              <td>
+                <a href="{% url 'advertisement' rent.advertisement_id %}" role="button">
+                    {{ rent.advertisement.title }}
+                </a>
+              </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Нет текущих аренд.</p>
+{% endif %}
+<p style="margin-top: 10px"><a href="{% url 'advertisements' %}" class="btn btn-secondary">Назад к списку</a></p>
+{% endblock %}

@@ -25,7 +25,8 @@ class CommentManager(models.Manager):
 
 
 class RentManager(models.Manager):
-    pass
+    def for_user(self, user):
+        return self.filter(renter=user)
 
 
 class LocationManager(models.Manager):

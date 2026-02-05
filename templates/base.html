@@ -54,6 +54,7 @@
                     <a href="{% url 'approve' %}" class="btn btn-outline-success">Approved Advertisements</a>
                 {% endif %}
                 <a href="{% url 'profile' %}" class="btn btn-outline-success">Profile</a> {# Use your profile URL #}
+                <a href="{% url 'rents' %}" class="btn btn-outline-success">My Rent</a>  {# Use your logout URL #}
                 <a href="/accounts/logout" class="btn btn-outline-danger">Log Out</a>  {# Use your logout URL #}
             {% else %}
                 <a href="{% url 'login' %}" class="btn btn-outline-primary">Log In</a>  {# Use your login URL #}

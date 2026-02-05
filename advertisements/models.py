@@ -1,15 +1,14 @@
 import datetime
 
 from django.db import models
+from django.utils.timezone import now
 
-from advertisements.managers import (
-    CategoryManager,
-    AdvertisementManager,
-    TransactionManager,
-    CommentManager,
-    RentManager,
-    LocationManager,
-)
+from advertisements.managers import AdvertisementManager
+from advertisements.managers import CategoryManager
+from advertisements.managers import CommentManager
+from advertisements.managers import LocationManager
+from advertisements.managers import RentManager
+from advertisements.managers import TransactionManager
 from users.models import User
 
 
@@ -35,20 +34,12 @@ class Location(models.Model):
 class Advertisement(models.Model):
     image_url = models.URLField(max_length=200, blank=True, null=True)
     title = models.CharField(max_length=200, verbose_name="Название")
-    category = models.ForeignKey(
-        Category, models.SET_NULL, null=True, blank=True, verbose_name="Категория"
-    )
+    category = models.ForeignKey(Category, models.SET_NULL, null=True, blank=True, verbose_name="Категория")
     description = models.TextField(verbose_name="Описание")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
-    location = models.ForeignKey(
-        Location, on_delete=models.CASCADE, verbose_name="Локация"
-    )
-    contact_phone = models.CharField(
-        max_length=20, blank=True, verbose_name="Контактный телефон"
-    )
-    contact_email = models.EmailField(
-        blank=True, verbose_name="Контактный email"
-    )  # Добавил поле email
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name="Локация")
+    contact_phone = models.CharField(max_length=20, blank=True, verbose_name="Контактный телефон")
+    contact_email = models.EmailField(blank=True, verbose_name="Контактный email")  # Добавил поле email
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -73,9 +64,7 @@ class Advertisement(models.Model):
 
 
 class Rent(models.Model):
-    advertisement = models.ForeignKey(
-        Advertisement, on_delete=models.CASCADE, verbose_name="Объявление"
-    )
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, verbose_name="Объявление")
     renter = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -84,20 +73,25 @@ class Rent(models.Model):
     )
     from_date = models.DateField(verbose_name="Начало аренды")
     to_date = models.DateField(verbose_name="Окончание аренды")
+    overdue = models.BooleanField(default=False, verbose_name="Просрочено")
     payed = models.BooleanField(default=False)
     create_at = models.DateTimeField(auto_now=True, verbose_name="Дата создания")
     update_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     objects = RentManager()
 
+    def save(self, *args, **kwargs):
+        if not self.pk or kwargs.get("force_update", False):  # проверяем, не новый ли объект
+            today = now().date()  # используем timezone.now(), чтобы учитывать часовой пояс
+            self.overdue = today > self.to_date
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Аренда  пользователя {self.renter.__str__()} к объявлению {self.advertisement}"
 
 
 class Transaction(models.Model):
-    transaction_date = models.DateTimeField(
-        auto_now_add=True, verbose_name="Дата транзакции"
-    )
+    transaction_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата транзакции")
     rent = models.ForeignKey(
         Rent,
         on_delete=models.SET_NULL,
@@ -106,9 +100,7 @@ class Transaction(models.Model):
         related_name="transactions",
         verbose_name="Аренда",
     )
-    created_at = models.DateTimeField(
-        verbose_name="Дата создания", default=datetime.datetime.now()
-    )
+    created_at = models.DateTimeField(verbose_name="Дата создания", default=datetime.datetime.now())
 
     objects = TransactionManager()
 

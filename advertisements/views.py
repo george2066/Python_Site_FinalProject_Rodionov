@@ -1,37 +1,36 @@
-import os
 import json
 import logging
-import requests
-from datetime import timedelta
+import os
 
-
-from yookassa import Configuration, Payment
-
-
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.utils import timezone
-from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy, reverse
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.views.generic import (
-    ListView,
-    CreateView,
-    UpdateView,
-    DetailView,
-    DeleteView,
-    TemplateView,
-)
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.urls import reverse
+from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.views.generic import CreateView
+from django.views.generic import DeleteView
+from django.views.generic import DetailView
+from django.views.generic import ListView
+from django.views.generic import TemplateView
+from django.views.generic import UpdateView
+from yookassa import Configuration
+from yookassa import Payment
 
-
-from advertisements.forms import CommentForm, RentForm
-from advertisements.models import Advertisement, Transaction, Comment, Location, Rent
+from advertisements.forms import CommentForm
+from advertisements.forms import RentForm
+from advertisements.models import Advertisement
+from advertisements.models import Comment
+from advertisements.models import Location
+from advertisements.models import Rent
+from advertisements.models import Transaction
 from diplom import settings
-from users.models import User
 
 TEMPLATE_DIR = "advertisements"
 logger = logging.getLogger(__name__)
@@ -105,12 +104,8 @@ def payment_success(request):
         if payment.status == "succeeded":
             metadata = payment.metadata
             advertisement_id = metadata.get("advertisement_id")
-            rent_id_from_metadata = metadata.get(
-                "rent_id"
-            )  # Можно использовать, если есть
-            advertisement_id_from_metadata = metadata.get(
-                "advertisement_id"
-            )  # Можно использовать, если есть
+            rent_id_from_metadata = metadata.get("rent_id")  # Можно использовать, если есть
+            advertisement_id_from_metadata = metadata.get("advertisement_id")  # Можно использовать, если есть
 
             # Или использовать rent_id из сессии
             rent_id_to_use = rent_id or rent_id_from_metadata
@@ -129,9 +124,7 @@ def payment_success(request):
             # Создаем транзакцию
             transaction = Transaction.objects.create(rent=rent)
 
-            messages.success(
-                request, f"Оплата прошла успешно! ID транзакции: {transaction.id}"
-            )
+            messages.success(request, f"Оплата прошла успешно! ID транзакции: {transaction.id}")
         else:
             messages.error(request, f"Платёж не завершён (статус: {payment.status})")
     except Exception as e:
@@ -203,9 +196,7 @@ def edit_comment(request):
         comment.save()
         return JsonResponse({"success": True})
     except Exception:
-        return JsonResponse(
-            {"success": False, "error": "Комментарий не найден или недоступен"}
-        )
+        return JsonResponse({"success": False, "error": "Комментарий не найден или недоступен"})
 
 
 @csrf_exempt
@@ -218,9 +209,7 @@ def delete_comment(request):
             comment.delete()
             return JsonResponse({"success": True})
         except Exception:
-            return JsonResponse(
-                {"success": False, "error": "Комментарий не найден или недоступен"}
-            )
+            return JsonResponse({"success": False, "error": "Комментарий не найден или недоступен"})
     return JsonResponse({"success": False, "error": "Некорректный метод"})
 
 
@@ -355,6 +344,14 @@ class HomePageView(TemplateView):
         context["page_obj"] = page_obj
 
         return context
+
+
+class RentListView(LoginRequiredMixin, ListView):
+    login_url = reverse_lazy("account_login")
+    template_name = os.path.join(TEMPLATE_DIR, "advertisement_rent_list.html")
+
+    def get_queryset(self):
+        return Rent.objects.for_user(self.request.user)
 
 
 class SearchResultsView(ListView):

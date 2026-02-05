@@ -1,24 +1,23 @@
 from django.urls import path
 
-from advertisements.views import (
-    AdvertisementsUserListView,
-    AdvertisementDetailView,
-    AdvertisementCreateView,
-    AdvertisementDeleteView,
-    AdvertisementUpdateView,
-    HomePageView,
-    SearchResultsView,
-    RentCreateView,
-    buy_rent,
-    payment_success,
-    approve_ad,
-    edit_comment,
-    delete_comment,
-)
-
+from advertisements.views import AdvertisementCreateView
+from advertisements.views import AdvertisementDeleteView
+from advertisements.views import AdvertisementDetailView
+from advertisements.views import AdvertisementsUserListView
+from advertisements.views import AdvertisementUpdateView
+from advertisements.views import approve_ad
+from advertisements.views import buy_rent
+from advertisements.views import delete_comment
+from advertisements.views import edit_comment
+from advertisements.views import HomePageView
+from advertisements.views import payment_success
+from advertisements.views import RentCreateView
+from advertisements.views import RentListView
+from advertisements.views import SearchResultsView
 
 urlpatterns = [
     path("search/", SearchResultsView.as_view(), name="search_results"),
+    path("rents/", RentListView.as_view(), name="rents"),
     path("advertisements", HomePageView.as_view(), name="advertisements"),
     path(
         "advertisements/my",

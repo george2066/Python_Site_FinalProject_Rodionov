@@ -1,27 +1,37 @@
 import json
 from datetime import datetime
+from datetime import timedelta
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
-from django.test import TestCase, Client, RequestFactory
+from django.contrib.messages import get_messages
+from django.contrib.messages.middleware import MessageMiddleware
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.test import Client
+from django.test import RequestFactory
+from django.test import TestCase
 from django.urls import reverse
-from unittest.mock import patch, MagicMock
 
+from advertisements.models import Advertisement
+from advertisements.models import Category
+from advertisements.models import Comment
+from advertisements.models import Location
+from advertisements.models import Rent
+from advertisements.models import Transaction
 from advertisements.views import buy_rent
+from advertisements.views import payment_success
 from users.models import User
-from advertisements.models import Advertisement, Comment, Category, Location, Rent
-from django.utils import timezone
 
 
 # Create your tests here.
-class AdvertisementViewsTestCase(TestCase):
+class ViewsTestCase(TestCase):
     @classmethod
     def setUp(self):
         self.factory = RequestFactory()
         self.client = Client()
         # Создаём тестового пользователя
         self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.admin = User.objects.create_superuser(
-            username="admin", email="admin@example.com", password="pass"
-        )
+        self.admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="pass")
         # Создаем категорию
         category = Category.objects.create(name="Test Category")
         # Создаём объявление
@@ -53,6 +63,16 @@ class AdvertisementViewsTestCase(TestCase):
         )
         self.client.login(username="admin", password="pass")
 
+    def add_middleware(self, request):
+        # Добавляем middleware для работы messages и session
+        middleware = SessionMiddleware(request)
+        middleware.process_request(request)
+        request.session.save()
+
+        messages_middleware = MessageMiddleware(request)
+        messages_middleware.process_request(request)
+        return request
+
     def test_advertisement_detail_view(self):
         url = reverse("advertisement", kwargs={"pk": self.ad.pk})
         response = self.client.get(url)
@@ -63,9 +83,7 @@ class AdvertisementViewsTestCase(TestCase):
         url = reverse("advertisement", kwargs={"pk": self.ad.pk})
         self.client.login(username="testuser", password="testpass")
         response = self.client.post(url, {"comment": "Test comment"})
-        self.assertEqual(
-            response.status_code, 302
-        )  # редирект после успешного добавления
+        self.assertEqual(response.status_code, 302)  # редирект после успешного добавления
         self.assertTrue(Comment.objects.filter(comment="Test comment").exists())
 
     def test_edit_comment(self):
@@ -93,9 +111,7 @@ class AdvertisementViewsTestCase(TestCase):
         )
         url = reverse("delete_comment")  # укажите правильный URL
         self.client.login(username="testuser", password="testpass")
-        response = self.client.post(
-            url, json.dumps({"comment_id": comment.pk}), content_type="application/json"
-        )
+        response = self.client.post(url, json.dumps({"comment_id": comment.pk}), content_type="application/json")
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Comment.objects.filter(pk=comment.pk).exists())
 
@@ -165,9 +181,7 @@ class AdvertisementViewsTestCase(TestCase):
             location=self.location,
             author=self.user,
         )
-        response = self.client.post(
-            "/advertisements/approve/", data={"approve_ad": [str(ad1.id), str(ad2.id)]}
-        )
+        response = self.client.post("/advertisements/approve/", data={"approve_ad": [str(ad1.id), str(ad2.id)]})
         self.assertEqual(302, response.status_code)
 
         ad1.refresh_from_db()
@@ -186,9 +200,7 @@ class AdvertisementViewsTestCase(TestCase):
     @patch("yookassa.Payment.create")
     @patch("yookassa.Configuration.account_id", new_callable=property)
     @patch("yookassa.Configuration.secret_key", new_callable=property)
-    def test_buy_rent_success(
-        self, mock_secret_key, mock_account_id, mock_create_payment
-    ):
+    def test_buy_rent_success(self, mock_secret_key, mock_account_id, mock_create_payment):
         # Настраиваем мок для Payment.create
         mock_payment = MagicMock()
         mock_payment.id = "payment_id_123"
@@ -209,3 +221,86 @@ class AdvertisementViewsTestCase(TestCase):
 
         # Проверяем, что ID платежа сохранён в сессии
         self.assertEqual(request.session["payment_id"], "payment_id_123")
+
+    def test_overdue_field_calculation_positive(self):
+        # Текущая дата
+        today = datetime.now().date()
+
+        # Создаем аренду с датой окончания в прошлом — overdue должно стать True
+        rent_past = Rent.objects.create(
+            advertisement=self.ad,
+            renter=self.user,
+            from_date=today.replace(day=1),  # произвольно
+            to_date=today.replace(day=1) - timedelta(days=1),  # вчера
+        )
+        rent_past.refresh_from_db()
+        self.assertTrue(rent_past.overdue, "Поле overdue должно быть True для прошедших дат")
+
+    def test_overdue_field_calculation_negative(self):
+        today = datetime.now().date()
+        # Создаем аренду с датой окончания в будущем — overdue должно стать False
+        future_date = today + timedelta(days=10)
+        rent_future = Rent.objects.create(
+            advertisement=self.ad,
+            renter=self.user,
+            from_date=today,
+            to_date=future_date,
+        )
+        rent_future.refresh_from_db()
+        self.assertFalse(rent_future.overdue, "Поле overdue должно быть False для будущих дат")
+
+    @patch("yookassa.Payment.find_one")
+    def test_payment_success_succeeded(self, mock_find_one):
+        # Настройка mock
+        mock_payment = MagicMock()
+        mock_payment.status = "succeeded"
+        mock_payment.metadata = {
+            "advertisement_id": self.ad.id,
+            "rent_id": self.rent.id,
+        }
+        mock_find_one.return_value = mock_payment
+
+        # Создаем request
+        request = self.factory.get("/some-url/")
+        request = self.add_middleware(request)
+        request.session["payment_id"] = "test_payment_id"
+        request.session["rent_id"] = self.rent.id
+        request.session["advrtisement_id"] = self.ad.id
+
+        # Вызов функции
+        response = payment_success(request)
+
+        # Проверка
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(get_messages(request))
+        self.assertTrue(any("Оплата прошла успешно" in str(msg) for msg in messages_list))
+        # Проверяем, что реквизиты обновлены
+        self.ad.refresh_from_db()
+        self.rent.refresh_from_db()
+        self.assertTrue(self.ad.sold)
+        self.assertTrue(self.rent.payed)
+        # Проверка, что транзакция создана
+        self.assertTrue(Transaction.objects.filter(rent=self.rent).exists())
+        # Проверка, что сессия очищена
+        self.assertNotIn("payment_id", request.session)
+        self.assertNotIn("rent_id", request.session)
+
+    @patch("yookassa.Payment.find_one")
+    def test_exception_handling(self, mock_find_one):
+        mock_find_one.side_effect = Exception("Ошибка API")
+        request = self.factory.get("/some-url/")
+        request = self.add_middleware(request)
+        request.session["payment_id"] = "test_payment_id"
+        request.session["rent_id"] = self.rent.id
+        request.session["advrtisement_id"] = self.ad.id
+
+        response = payment_success(request)
+
+        self.assertEqual(response.status_code, 200)
+        messages_list = list(get_messages(request))
+        self.assertTrue(any("Ошибка проверки платежа" in str(msg) for msg in messages_list))
+        # Проверка, что объекты не обновлены
+        self.ad.refresh_from_db()
+        self.rent.refresh_from_db()
+        self.assertFalse(self.ad.sold)
+        self.assertFalse(self.rent.payed)
