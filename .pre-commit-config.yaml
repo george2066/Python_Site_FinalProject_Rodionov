@@ -1,35 +1,49 @@
 repos:
--   repo: local
-    hooks:
-    -   id: run-tests
-        name: Run tests before commit
-        entry: python manage.py test
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [commit]
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: "v2.5.0"
+      hooks:
+        - id: check-merge-conflict
+        - id: debug-statements
 
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
-    hooks:
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
+    - repo: local
 
--   repo: https://github.com/george2066/Python_Site_FinalProject_Rodionov.git
-    rev: 6.0.0
-    hooks:
-    -   id: flake8
-        args: ["--ignore=E501"]
-        additional-dependencies:
-            - flake8-django
-            - flake8-todo
-            - flake8-variables-names
-            - flake8-commas
-            - pep8-naming
-            - flake8-bugbear
-            - flake8-builtins
-            - flake8-quotes
-            - pre-commit
-            - flake8-cognitive-complexity
-            - flake8-isort
+      hooks:
+        - id: black
+          name: black
+          entry: black
+          language: system
+          types: [python]
+          args: [--line-length=200, --target-version=py37]
+
+        - id: autoflake
+          name: autoflake
+          entry: autoflake
+          language: system
+          types: [python]
+          args: [--in-place, --remove-all-unused-imports, --remove-duplicate-keys]
+
+        - id: pyupgrade
+          name: pyupgrade
+          entry: pyupgrade
+          language: system
+          types: [python]
+          args: [--py37-plus]
+
+        - id: reorder-python-imports
+          name: reorder-python-imports
+          entry: reorder-python-imports
+          language: system
+          types: [python]
+          args: [--py37-plus]
+
+        - id: yesqa
+          name: yesqa
+          entry: yesqa
+          language: system
+          types: [python]
+
+        - id: tests
+          name: Run tests
+          entry: "python ./advertisements/run_tests.py"
+          language: system
+          verbose: true
