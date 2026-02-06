@@ -1,16 +1,17 @@
+from django.core.validators import validate_email
 from rest_framework import serializers
 
+from advertisements.models import Advertisement
+from advertisements.models import Category
+from advertisements.models import Comment
+from advertisements.models import Rent
+from advertisements.models import Transaction
 from users.models import User
-from django.core.validators import validate_email
-
-from advertisements.models import Advertisement, Category, Transaction, Comment, Rent
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):
     # Дополнительно выводим название категории и имя автора
-    category_name = serializers.CharField(
-        source="category.name", read_only=True, allow_null=True
-    )
+    category_name = serializers.CharField(source="category.name", read_only=True, allow_null=True)
     author_name = serializers.CharField(source="author.get_full_name", read_only=True)
     author_email = serializers.EmailField(source="author.email", read_only=True)
 
@@ -86,9 +87,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         # Проверка уникальности email
         if User.objects.filter(email__iexact=value).exists():
-            raise serializers.ValidationError(
-                "Пользователь с таким email уже существует."
-            )
+            raise serializers.ValidationError("Пользователь с таким email уже существует.")
         return value.lower().strip()
 
     def validate_username(self, value):
@@ -113,14 +112,8 @@ class UserSerializer(serializers.ModelSerializer):
         email = validated_data.get("email")
         if email:
             email = email.lower().strip()
-            if (
-                User.objects.filter(email__iexact=email)
-                .exclude(id=instance.id)
-                .exists()
-            ):
-                raise serializers.ValidationError(
-                    {"email": "Email уже используется другим пользователем."}
-                )
+            if User.objects.filter(email__iexact=email).exclude(id=instance.id).exists():
+                raise serializers.ValidationError({"email": "Email уже используется другим пользователем."})
             instance.email = email
 
         # Обновление username
@@ -153,15 +146,11 @@ class CategorySerializer(serializers.ModelSerializer):
         Также проверяем уникальность (если требуется).
         """
         if not value or not value.strip():
-            raise serializers.ValidationError(
-                "Название категории не может быть пустым."
-            )
+            raise serializers.ValidationError("Название категории не может быть пустым.")
 
         # Проверка уникальности (опционально)
         if Category.objects.filter(name__iexact=value.strip()).exists():
-            raise serializers.ValidationError(
-                "Категория с таким названием уже существует."
-            )
+            raise serializers.ValidationError("Категория с таким названием уже существует.")
 
         return value.strip()
 
@@ -181,9 +170,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    rent_id = serializers.PrimaryKeyRelatedField(
-        source="rent", queryset=Rent.objects.all(), read_only=False
-    )
+    rent_id = serializers.PrimaryKeyRelatedField(source="rent", queryset=Rent.objects.all(), read_only=False)
     transaction_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     advertisement_price = serializers.SerializerMethodField()
@@ -250,12 +237,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class RentSerializer(serializers.ModelSerializer):
-    advertisement_id = serializers.PrimaryKeyRelatedField(
-        source="advertisement", queryset=Advertisement.objects.all(), read_only=False
-    )
-    renter_id = serializers.PrimaryKeyRelatedField(
-        source="renter", queryset=User.objects.all(), read_only=False
-    )
+    advertisement_id = serializers.PrimaryKeyRelatedField(source="advertisement", queryset=Advertisement.objects.all(), read_only=False)
+    renter_id = serializers.PrimaryKeyRelatedField(source="renter", queryset=User.objects.all(), read_only=False)
     from_date = serializers.DateField(format="%Y-%m-%d")
     to_date = serializers.DateField(format="%Y-%m-%d")
     create_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", read_only=True)

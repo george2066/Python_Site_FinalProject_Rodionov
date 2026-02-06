@@ -2,6 +2,7 @@ import json
 import logging
 import os
 
+import pika
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
@@ -12,6 +13,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView
@@ -31,6 +33,7 @@ from advertisements.models import Location
 from advertisements.models import Rent
 from advertisements.models import Transaction
 from diplom import settings
+from users.models import User
 
 TEMPLATE_DIR = "advertisements"
 logger = logging.getLogger(__name__)
@@ -121,8 +124,20 @@ def payment_success(request):
             rent.payed = True
             rent.save()
 
+            renter = rent.renter
+            queue = "rent_create"
             # Создаем транзакцию
-            transaction = Transaction.objects.create(rent=rent)
+            transaction = Transaction.objects.create(rent=rent, created_at=timezone.now())
+
+            json_messages = json.dumps(
+                {
+                    "author_advertisement": str(advertisement.author.id),  # убедитесь, что это сериализуемо
+                    "renter": str(renter.id),  # или сериализуйте по необходимости
+                    "advertisement": str(advertisement.id),  # если необходимо
+                }
+            )
+
+            send_message_to_author_queue(queue, json_messages)
 
             messages.success(request, f"Оплата прошла успешно! ID транзакции: {transaction.id}")
         else:
@@ -218,6 +233,27 @@ def filter_advertisements():
     advertisements = advertisements.filter(sold=False)
     advertisements = advertisements.filter(is_approved=True)
     return advertisements
+
+
+def send_message_to_author_queue(queue_name, message):
+    connection_params = pika.ConnectionParameters(host="localhost")
+    connection = pika.BlockingConnection(connection_params)
+    channel = connection.channel()
+
+    # Объявляем очередь с динамическим именем
+    channel.queue_declare(queue=queue_name, durable=True)
+
+    # Отправляем сообщение в указанную очередь
+    channel.basic_publish(
+        exchange="",
+        routing_key=queue_name,
+        body=message,
+        properties=pika.BasicProperties(
+            delivery_mode=2,
+        ),
+    )
+
+    connection.close()
 
 
 # Create your views here.
@@ -390,9 +426,13 @@ class RentCreateView(CreateView):
     def form_valid(self, form):
         # Устанавливаем связь с объявлением
         ad_id = self.kwargs["ad_id"]
+        renter_id = self.kwargs["author_id"]
+
         advertisement = Advertisement.objects.get(pk=ad_id)
+        renter = User.objects.get(pk=renter_id)
+
         form.instance.advertisement = advertisement
-        form.instance.renter = self.request.user
+        form.instance.renter = renter
         return super().form_valid(form)
 
     def get_success_url(self):

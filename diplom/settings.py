@@ -9,9 +9,9 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
-from pathlib import Path
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -120,7 +120,7 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -165,8 +165,6 @@ YOOKASSA_SECRET_KEY = os.getenv("YOOKASSA_SECRET_KEY")
 # Swagger
 
 SWAGGER_SETTINGS = {
-    "SECURITY_DEFINITIONS": {
-        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
-    },
+    "SECURITY_DEFINITIONS": {"Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}},
     "USE_SESSION_AUTH": False,
 }

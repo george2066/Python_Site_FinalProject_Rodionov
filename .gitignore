@@ -3,3 +3,5 @@
 .env
 db.sqlite3
 uv.lock
+migrations/
+__pycache__/

@@ -1,22 +1,25 @@
 import datetime
 
 from django.contrib.auth import get_user_model
-
-from rest_framework import status, filters
+from rest_framework import filters
+from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from advertisements.models import Category, Transaction, Advertisement, Comment, Rent
-from .serializers import (
-    CategorySerializer,
-    TransactionSerializer,
-    UserSerializer,
-    AdvertisementSerializer,
-    CommentSerializer,
-    RentSerializer,
-)
+from .serializers import AdvertisementSerializer
+from .serializers import CategorySerializer
+from .serializers import CommentSerializer
+from .serializers import RentSerializer
+from .serializers import TransactionSerializer
+from .serializers import UserSerializer
+from advertisements.models import Advertisement
+from advertisements.models import Category
+from advertisements.models import Comment
+from advertisements.models import Rent
+from advertisements.models import Transaction
 
 User = get_user_model()
 
@@ -52,9 +55,7 @@ class AdvertisementViewSet(ModelViewSet):
         """При обновлении проверяем, что автор — текущий пользователь (или админ)"""
         instance = self.get_object()
         if instance.author != self.request.user and not self.request.user.is_staff:
-            self.permission_denied(
-                self.request, message="Вы не можете редактировать это объявление."
-            )
+            self.permission_denied(self.request, message="Вы не можете редактировать это объявление.")
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
@@ -126,9 +127,7 @@ class UserViewSet(ModelViewSet):
         """Обновление: только сам пользователь или админ"""
         instance = self.get_object()
         if instance != self.request.user and not self.request.user.is_staff:
-            self.permission_denied(
-                self.request, message="Вы не можете редактировать этого пользователя."
-            )
+            self.permission_denied(self.request, message="Вы не можете редактировать этого пользователя.")
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
@@ -299,9 +298,7 @@ class CommentViewSet(ModelViewSet):
     ]
     search_fields = ["comment"]
     ordering_fields = ["create_at", "update_at"]
-    ordering = [
-        "-create_at"
-    ]  # сортировка по умолчанию — по дате создания, newest first
+    ordering = ["-create_at"]  # сортировка по умолчанию — по дате создания, newest first
 
     def get_permissions(self):
         """

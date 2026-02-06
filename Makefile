@@ -19,3 +19,5 @@ showmigrate:
 ruff:
 	ruff format .
 
+pc:
+	pre-commit clean && pre-commit install && pre-commit autoupdate

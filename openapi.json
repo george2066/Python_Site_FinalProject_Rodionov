@@ -1,1318 +1,1046 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "title": "My API",
-    "description": "Test description",
-    "termsOfService": "https://www.google.com/policies/terms/",
-    "contact": {
-      "email": "contact@myapi.local"
+    "swagger": "2.0",
+    "info": {
+        "title": "My API",
+        "description": "Test description",
+        "termsOfService": "https://www.google.com/policies/terms/",
+        "contact": {"email": "contact@myapi.local"},
+        "license": {"name": "BSD License"},
+        "version": "v1",
     },
-    "license": {
-      "name": "BSD License"
+    "host": "127.0.0.1:8000",
+    "schemes": ["http"],
+    "basePath": "/api",
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "securityDefinitions": {
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     },
-    "version": "v1"
-  },
-  "host": "127.0.0.1:8000",
-  "schemes": [
-    "http"
-  ],
-  "basePath": "/api",
-  "consumes": [
-    "application/json"
-  ],
-  "produces": [
-    "application/json"
-  ],
-  "securityDefinitions": {
-    "Bearer": {
-      "type": "apiKey",
-      "name": "Authorization",
-      "in": "header"
-    }
-  },
-  "security": [
-    {
-      "Bearer": []
-    }
-  ],
-  "paths": {
-    "/advertisements/": {
-      "get": {
-        "operationId": "advertisements_list",
-        "description": "API для управления объявлениями (CRUD).",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Advertisement"
-              }
-            }
-          }
+    "security": [{"Bearer": []}],
+    "paths": {
+        "/advertisements/": {
+            "get": {
+                "operationId": "advertisements_list",
+                "description": "API для управления объявлениями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Advertisement"},
+                        },
+                    }
+                },
+                "tags": ["advertisements"],
+            },
+            "post": {
+                "operationId": "advertisements_create",
+                "description": "API для управления объявлениями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                },
+                "tags": ["advertisements"],
+            },
+            "parameters": [],
         },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "post": {
-        "operationId": "advertisements_create",
-        "description": "API для управления объявлениями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
+        "/advertisements/my/": {
+            "get": {
+                "operationId": "advertisements_my_advertisements",
+                "description": "Возвращает объявления текущего пользователя",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Advertisement"},
+                        },
+                    }
+                },
+                "tags": ["advertisements"],
+            },
+            "parameters": [],
         },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "parameters": []
+        "/advertisements/{id}/": {
+            "get": {
+                "operationId": "advertisements_read",
+                "description": "API для управления объявлениями (CRUD).",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                },
+                "tags": ["advertisements"],
+            },
+            "put": {
+                "operationId": "advertisements_update",
+                "description": "API для управления объявлениями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                },
+                "tags": ["advertisements"],
+            },
+            "patch": {
+                "operationId": "advertisements_partial_update",
+                "description": "API для управления объявлениями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Advertisement"},
+                    }
+                },
+                "tags": ["advertisements"],
+            },
+            "delete": {
+                "operationId": "advertisements_delete",
+                "description": "Удаление с проверкой прав",
+                "parameters": [],
+                "responses": {"204": {"description": ""}},
+                "tags": ["advertisements"],
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this Объявление.",
+                    "required": true,
+                    "type": "integer",
+                }
+            ],
+        },
+        "/category/": {
+            "get": {
+                "operationId": "category_list",
+                "description": "API для управления категориями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Category"},
+                        },
+                    }
+                },
+                "tags": ["category"],
+            },
+            "post": {
+                "operationId": "category_create",
+                "description": "API для управления категориями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                },
+                "tags": ["category"],
+            },
+            "parameters": [],
+        },
+        "/category/active/": {
+            "get": {
+                "operationId": "category_active_categories",
+                "description": "Возвращает активные категории (если есть поле is_active)",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Category"},
+                        },
+                    }
+                },
+                "tags": ["category"],
+            },
+            "parameters": [],
+        },
+        "/category/{id}/": {
+            "get": {
+                "operationId": "category_read",
+                "description": "API для управления категориями (CRUD).",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                },
+                "tags": ["category"],
+            },
+            "put": {
+                "operationId": "category_update",
+                "description": "API для управления категориями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                },
+                "tags": ["category"],
+            },
+            "patch": {
+                "operationId": "category_partial_update",
+                "description": "API для управления категориями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Category"},
+                    }
+                },
+                "tags": ["category"],
+            },
+            "delete": {
+                "operationId": "category_delete",
+                "description": "Удаление категории с проверкой",
+                "parameters": [],
+                "responses": {"204": {"description": ""}},
+                "tags": ["category"],
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this category.",
+                    "required": true,
+                    "type": "integer",
+                }
+            ],
+        },
+        "/comment/": {
+            "get": {
+                "operationId": "comment_list",
+                "description": "API для управления комментариями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Comment"},
+                        },
+                    }
+                },
+                "tags": ["comment"],
+            },
+            "post": {
+                "operationId": "comment_create",
+                "description": "API для управления комментариями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                },
+                "tags": ["comment"],
+            },
+            "parameters": [],
+        },
+        "/comment/my-comments/": {
+            "get": {
+                "operationId": "comment_my_comments",
+                "description": "Получить все комментарии текущего пользователя.",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Comment"},
+                        },
+                    }
+                },
+                "tags": ["comment"],
+            },
+            "parameters": [],
+        },
+        "/comment/{id}/": {
+            "get": {
+                "operationId": "comment_read",
+                "description": "API для управления комментариями (CRUD).",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                },
+                "tags": ["comment"],
+            },
+            "put": {
+                "operationId": "comment_update",
+                "description": "API для управления комментариями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                },
+                "tags": ["comment"],
+            },
+            "patch": {
+                "operationId": "comment_partial_update",
+                "description": "API для управления комментариями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Comment"},
+                    }
+                },
+                "tags": ["comment"],
+            },
+            "delete": {
+                "operationId": "comment_delete",
+                "description": "Удаление комментария с проверкой прав.",
+                "parameters": [],
+                "responses": {"204": {"description": ""}},
+                "tags": ["comment"],
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this comment.",
+                    "required": true,
+                    "type": "integer",
+                }
+            ],
+        },
+        "/transaction/": {
+            "get": {
+                "operationId": "transaction_list",
+                "description": "API для управления транзакциями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Transaction"},
+                        },
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "post": {
+                "operationId": "transaction_create",
+                "description": "API для управления транзакциями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "parameters": [],
+        },
+        "/transaction/my/": {
+            "get": {
+                "operationId": "transaction_my_transactions",
+                "description": "Возвращает транзакции текущего пользователя",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Transaction"},
+                        },
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "parameters": [],
+        },
+        "/transaction/{id}/": {
+            "get": {
+                "operationId": "transaction_read",
+                "description": "API для управления транзакциями (CRUD).",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "put": {
+                "operationId": "transaction_update",
+                "description": "API для управления транзакциями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "patch": {
+                "operationId": "transaction_partial_update",
+                "description": "API для управления транзакциями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "delete": {
+                "operationId": "transaction_delete",
+                "description": "Удаление транзакции с проверкой прав",
+                "parameters": [],
+                "responses": {"204": {"description": ""}},
+                "tags": ["transaction"],
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this Транзакция.",
+                    "required": true,
+                    "type": "integer",
+                }
+            ],
+        },
+        "/transaction/{id}/details/": {
+            "get": {
+                "operationId": "transaction_transaction_details",
+                "description": "Возвращает детали транзакции с дополнительной информацией",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {"$ref": "#/definitions/Transaction"},
+                    }
+                },
+                "tags": ["transaction"],
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this Транзакция.",
+                    "required": true,
+                    "type": "integer",
+                }
+            ],
+        },
+        "/users/": {
+            "get": {
+                "operationId": "users_list",
+                "description": "API для управления пользователями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/User"},
+                        },
+                    }
+                },
+                "tags": ["users"],
+            },
+            "post": {
+                "operationId": "users_create",
+                "description": "API для управления пользователями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/User"},
+                    }
+                ],
+                "responses": {
+                    "201": {"description": "", "schema": {"$ref": "#/definitions/User"}}
+                },
+                "tags": ["users"],
+            },
+            "parameters": [],
+        },
+        "/users/me/": {
+            "get": {
+                "operationId": "users_current_user",
+                "description": "Возвращает данные текущего авторизованного пользователя",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "A search term.",
+                        "required": false,
+                        "type": "string",
+                    },
+                    {
+                        "name": "ordering",
+                        "in": "query",
+                        "description": "Which field to use when ordering the results.",
+                        "required": false,
+                        "type": "string",
+                    },
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/User"},
+                        },
+                    }
+                },
+                "tags": ["users"],
+            },
+            "parameters": [],
+        },
+        "/users/{id}/": {
+            "get": {
+                "operationId": "users_read",
+                "description": "API для управления пользователями (CRUD).",
+                "parameters": [],
+                "responses": {
+                    "200": {"description": "", "schema": {"$ref": "#/definitions/User"}}
+                },
+                "tags": ["users"],
+            },
+            "put": {
+                "operationId": "users_update",
+                "description": "API для управления пользователями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/User"},
+                    }
+                ],
+                "responses": {
+                    "200": {"description": "", "schema": {"$ref": "#/definitions/User"}}
+                },
+                "tags": ["users"],
+            },
+            "patch": {
+                "operationId": "users_partial_update",
+                "description": "API для управления пользователями (CRUD).",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {"$ref": "#/definitions/User"},
+                    }
+                ],
+                "responses": {
+                    "200": {"description": "", "schema": {"$ref": "#/definitions/User"}}
+                },
+                "tags": ["users"],
+            },
+            "delete": {
+                "operationId": "users_delete",
+                "description": "Удаление: только админ или сам пользователь (если не суперпользователь)",
+                "parameters": [],
+                "responses": {"204": {"description": ""}},
+                "tags": ["users"],
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "description": "A unique integer value identifying this Пользователь.",
+                    "required": true,
+                    "type": "integer",
+                }
+            ],
+        },
     },
-    "/advertisements/my/": {
-      "get": {
-        "operationId": "advertisements_my_advertisements",
-        "description": "Возвращает объявления текущего пользователя",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Advertisement"
-              }
-            }
-          }
+    "definitions": {
+        "Advertisement": {
+            "required": ["title", "description", "price", "location"],
+            "type": "object",
+            "properties": {
+                "id": {"title": "ID", "type": "integer", "readOnly": true},
+                "image_url": {
+                    "title": "Image url",
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 200,
+                    "x-nullable": true,
+                },
+                "title": {
+                    "title": "Название",
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1,
+                },
+                "category": {
+                    "title": "Категория",
+                    "type": "integer",
+                    "x-nullable": true,
+                },
+                "category_name": {
+                    "title": "Category name",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "x-nullable": true,
+                },
+                "description": {"title": "Описание", "type": "string", "minLength": 1},
+                "price": {"title": "Цена", "type": "string", "format": "decimal"},
+                "location": {
+                    "title": "Местоположение",
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                },
+                "contact_phone": {
+                    "title": "Контактный телефон",
+                    "type": "string",
+                    "maxLength": 20,
+                },
+                "contact_email": {
+                    "title": "Контактный email",
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                },
+                "author": {"title": "Автор", "type": "integer", "readOnly": true},
+                "author_name": {
+                    "title": "Author name",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1,
+                },
+                "author_email": {
+                    "title": "Author email",
+                    "type": "string",
+                    "format": "email",
+                    "readOnly": true,
+                    "minLength": 1,
+                },
+                "sold": {"title": "Sold", "type": "boolean"},
+                "is_active": {"title": "Активно", "type": "boolean"},
+                "created_at": {
+                    "title": "Дата создания",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+                "updated_at": {
+                    "title": "Дата обновления",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+            },
         },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "parameters": []
+        "Category": {
+            "required": ["name"],
+            "type": "object",
+            "properties": {
+                "id": {"title": "ID", "type": "integer", "readOnly": true},
+                "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1,
+                },
+                "date": {
+                    "title": "Date",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+            },
+        },
+        "Comment": {
+            "required": ["comment"],
+            "type": "object",
+            "properties": {
+                "id": {"title": "ID", "type": "integer", "readOnly": true},
+                "user": {"title": "User", "type": "string", "readOnly": true},
+                "advertisement": {
+                    "title": "Advertisement",
+                    "type": "integer",
+                    "readOnly": true,
+                },
+                "comment": {
+                    "title": "Comment",
+                    "type": "string",
+                    "maxLength": 510,
+                    "minLength": 1,
+                },
+                "create_at": {
+                    "title": "Create at",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+                "update_at": {
+                    "title": "Update at",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+            },
+        },
+        "Transaction": {
+            "type": "object",
+            "properties": {
+                "id": {"title": "ID", "type": "integer", "readOnly": true},
+                "transaction_date": {
+                    "title": "Дата транзакции",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+                "user": {
+                    "title": "Пользователь",
+                    "type": "integer",
+                    "x-nullable": true,
+                },
+                "user_username": {
+                    "title": "User username",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "x-nullable": true,
+                },
+                "user_email": {
+                    "title": "User email",
+                    "type": "string",
+                    "format": "email",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "x-nullable": true,
+                },
+                "advertisement": {
+                    "title": "Объявление",
+                    "type": "integer",
+                    "x-nullable": true,
+                },
+                "advertisement_title": {
+                    "title": "Advertisement title",
+                    "type": "string",
+                    "readOnly": true,
+                    "minLength": 1,
+                    "x-nullable": true,
+                },
+                "advertisement_price": {
+                    "title": "Advertisement price",
+                    "type": "string",
+                    "format": "decimal",
+                    "readOnly": true,
+                    "x-nullable": true,
+                },
+                "created_at": {
+                    "title": "Дата создания",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+            },
+        },
+        "User": {
+            "required": ["username", "email"],
+            "type": "object",
+            "properties": {
+                "id": {"title": "ID", "type": "integer", "readOnly": true},
+                "username": {
+                    "title": "Username",
+                    "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                    "type": "string",
+                    "pattern": "^[\\w.@+-]+$",
+                    "maxLength": 150,
+                    "minLength": 1,
+                },
+                "full_name": {"title": "Full name", "type": "string", "readOnly": true},
+                "email": {
+                    "title": "Адрес электронной почты",
+                    "type": "string",
+                    "format": "email",
+                    "maxLength": 254,
+                    "minLength": 1,
+                },
+                "image_url": {
+                    "title": "Image url",
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 400,
+                    "minLength": 1,
+                },
+                "is_active": {
+                    "title": "Active",
+                    "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                    "type": "boolean",
+                },
+                "is_staff": {
+                    "title": "Staff status",
+                    "description": "Designates whether the user can log into this admin site.",
+                    "type": "boolean",
+                    "readOnly": true,
+                },
+                "is_superuser": {
+                    "title": "Superuser status",
+                    "description": "Designates that this user has all permissions without explicitly assigning them.",
+                    "type": "boolean",
+                    "readOnly": true,
+                },
+                "date_joined": {
+                    "title": "Date joined",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                },
+                "last_login": {
+                    "title": "Last login",
+                    "type": "string",
+                    "format": "date-time",
+                    "readOnly": true,
+                    "x-nullable": true,
+                },
+            },
+        },
     },
-    "/advertisements/{id}/": {
-      "get": {
-        "operationId": "advertisements_read",
-        "description": "API для управления объявлениями (CRUD).",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
-        },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "put": {
-        "operationId": "advertisements_update",
-        "description": "API для управления объявлениями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
-        },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "patch": {
-        "operationId": "advertisements_partial_update",
-        "description": "API для управления объявлениями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Advertisement"
-            }
-          }
-        },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "delete": {
-        "operationId": "advertisements_delete",
-        "description": "Удаление с проверкой прав",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "advertisements"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "A unique integer value identifying this Объявление.",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    },
-    "/category/": {
-      "get": {
-        "operationId": "category_list",
-        "description": "API для управления категориями (CRUD).",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Category"
-              }
-            }
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "post": {
-        "operationId": "category_create",
-        "description": "API для управления категориями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "parameters": []
-    },
-    "/category/active/": {
-      "get": {
-        "operationId": "category_active_categories",
-        "description": "Возвращает активные категории (если есть поле is_active)",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Category"
-              }
-            }
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "parameters": []
-    },
-    "/category/{id}/": {
-      "get": {
-        "operationId": "category_read",
-        "description": "API для управления категориями (CRUD).",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "put": {
-        "operationId": "category_update",
-        "description": "API для управления категориями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "patch": {
-        "operationId": "category_partial_update",
-        "description": "API для управления категориями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Category"
-            }
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "delete": {
-        "operationId": "category_delete",
-        "description": "Удаление категории с проверкой",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "category"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "A unique integer value identifying this category.",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    },
-    "/comment/": {
-      "get": {
-        "operationId": "comment_list",
-        "description": "API для управления комментариями (CRUD).",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Comment"
-              }
-            }
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "post": {
-        "operationId": "comment_create",
-        "description": "API для управления комментариями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "parameters": []
-    },
-    "/comment/my-comments/": {
-      "get": {
-        "operationId": "comment_my_comments",
-        "description": "Получить все комментарии текущего пользователя.",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Comment"
-              }
-            }
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "parameters": []
-    },
-    "/comment/{id}/": {
-      "get": {
-        "operationId": "comment_read",
-        "description": "API для управления комментариями (CRUD).",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "put": {
-        "operationId": "comment_update",
-        "description": "API для управления комментариями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "patch": {
-        "operationId": "comment_partial_update",
-        "description": "API для управления комментариями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Comment"
-            }
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "delete": {
-        "operationId": "comment_delete",
-        "description": "Удаление комментария с проверкой прав.",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "comment"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "A unique integer value identifying this comment.",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    },
-    "/transaction/": {
-      "get": {
-        "operationId": "transaction_list",
-        "description": "API для управления транзакциями (CRUD).",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Transaction"
-              }
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "post": {
-        "operationId": "transaction_create",
-        "description": "API для управления транзакциями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "parameters": []
-    },
-    "/transaction/my/": {
-      "get": {
-        "operationId": "transaction_my_transactions",
-        "description": "Возвращает транзакции текущего пользователя",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Transaction"
-              }
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "parameters": []
-    },
-    "/transaction/{id}/": {
-      "get": {
-        "operationId": "transaction_read",
-        "description": "API для управления транзакциями (CRUD).",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "put": {
-        "operationId": "transaction_update",
-        "description": "API для управления транзакциями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "patch": {
-        "operationId": "transaction_partial_update",
-        "description": "API для управления транзакциями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "delete": {
-        "operationId": "transaction_delete",
-        "description": "Удаление транзакции с проверкой прав",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "A unique integer value identifying this Транзакция.",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    },
-    "/transaction/{id}/details/": {
-      "get": {
-        "operationId": "transaction_transaction_details",
-        "description": "Возвращает детали транзакции с дополнительной информацией",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/Transaction"
-            }
-          }
-        },
-        "tags": [
-          "transaction"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "A unique integer value identifying this Транзакция.",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    },
-    "/users/": {
-      "get": {
-        "operationId": "users_list",
-        "description": "API для управления пользователями (CRUD).",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "post": {
-        "operationId": "users_create",
-        "description": "API для управления пользователями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "parameters": []
-    },
-    "/users/me/": {
-      "get": {
-        "operationId": "users_current_user",
-        "description": "Возвращает данные текущего авторизованного пользователя",
-        "parameters": [
-          {
-            "name": "search",
-            "in": "query",
-            "description": "A search term.",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "ordering",
-            "in": "query",
-            "description": "Which field to use when ordering the results.",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "parameters": []
-    },
-    "/users/{id}/": {
-      "get": {
-        "operationId": "users_read",
-        "description": "API для управления пользователями (CRUD).",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "put": {
-        "operationId": "users_update",
-        "description": "API для управления пользователями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "patch": {
-        "operationId": "users_partial_update",
-        "description": "API для управления пользователями (CRUD).",
-        "parameters": [
-          {
-            "name": "data",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/User"
-            }
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "delete": {
-        "operationId": "users_delete",
-        "description": "Удаление: только админ или сам пользователь (если не суперпользователь)",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "users"
-        ]
-      },
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "A unique integer value identifying this Пользователь.",
-          "required": true,
-          "type": "integer"
-        }
-      ]
-    }
-  },
-  "definitions": {
-    "Advertisement": {
-      "required": [
-        "title",
-        "description",
-        "price",
-        "location"
-      ],
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "ID",
-          "type": "integer",
-          "readOnly": true
-        },
-        "image_url": {
-          "title": "Image url",
-          "type": "string",
-          "format": "uri",
-          "maxLength": 200,
-          "x-nullable": true
-        },
-        "title": {
-          "title": "Название",
-          "type": "string",
-          "maxLength": 200,
-          "minLength": 1
-        },
-        "category": {
-          "title": "Категория",
-          "type": "integer",
-          "x-nullable": true
-        },
-        "category_name": {
-          "title": "Category name",
-          "type": "string",
-          "readOnly": true,
-          "minLength": 1,
-          "x-nullable": true
-        },
-        "description": {
-          "title": "Описание",
-          "type": "string",
-          "minLength": 1
-        },
-        "price": {
-          "title": "Цена",
-          "type": "string",
-          "format": "decimal"
-        },
-        "location": {
-          "title": "Местоположение",
-          "type": "string",
-          "maxLength": 255,
-          "minLength": 1
-        },
-        "contact_phone": {
-          "title": "Контактный телефон",
-          "type": "string",
-          "maxLength": 20
-        },
-        "contact_email": {
-          "title": "Контактный email",
-          "type": "string",
-          "format": "email",
-          "maxLength": 254
-        },
-        "author": {
-          "title": "Автор",
-          "type": "integer",
-          "readOnly": true
-        },
-        "author_name": {
-          "title": "Author name",
-          "type": "string",
-          "readOnly": true,
-          "minLength": 1
-        },
-        "author_email": {
-          "title": "Author email",
-          "type": "string",
-          "format": "email",
-          "readOnly": true,
-          "minLength": 1
-        },
-        "sold": {
-          "title": "Sold",
-          "type": "boolean"
-        },
-        "is_active": {
-          "title": "Активно",
-          "type": "boolean"
-        },
-        "created_at": {
-          "title": "Дата создания",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        },
-        "updated_at": {
-          "title": "Дата обновления",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        }
-      }
-    },
-    "Category": {
-      "required": [
-        "name"
-      ],
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "ID",
-          "type": "integer",
-          "readOnly": true
-        },
-        "name": {
-          "title": "Name",
-          "type": "string",
-          "maxLength": 255,
-          "minLength": 1
-        },
-        "date": {
-          "title": "Date",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        }
-      }
-    },
-    "Comment": {
-      "required": [
-        "comment"
-      ],
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "ID",
-          "type": "integer",
-          "readOnly": true
-        },
-        "user": {
-          "title": "User",
-          "type": "string",
-          "readOnly": true
-        },
-        "advertisement": {
-          "title": "Advertisement",
-          "type": "integer",
-          "readOnly": true
-        },
-        "comment": {
-          "title": "Comment",
-          "type": "string",
-          "maxLength": 510,
-          "minLength": 1
-        },
-        "create_at": {
-          "title": "Create at",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        },
-        "update_at": {
-          "title": "Update at",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        }
-      }
-    },
-    "Transaction": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "ID",
-          "type": "integer",
-          "readOnly": true
-        },
-        "transaction_date": {
-          "title": "Дата транзакции",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        },
-        "user": {
-          "title": "Пользователь",
-          "type": "integer",
-          "x-nullable": true
-        },
-        "user_username": {
-          "title": "User username",
-          "type": "string",
-          "readOnly": true,
-          "minLength": 1,
-          "x-nullable": true
-        },
-        "user_email": {
-          "title": "User email",
-          "type": "string",
-          "format": "email",
-          "readOnly": true,
-          "minLength": 1,
-          "x-nullable": true
-        },
-        "advertisement": {
-          "title": "Объявление",
-          "type": "integer",
-          "x-nullable": true
-        },
-        "advertisement_title": {
-          "title": "Advertisement title",
-          "type": "string",
-          "readOnly": true,
-          "minLength": 1,
-          "x-nullable": true
-        },
-        "advertisement_price": {
-          "title": "Advertisement price",
-          "type": "string",
-          "format": "decimal",
-          "readOnly": true,
-          "x-nullable": true
-        },
-        "created_at": {
-          "title": "Дата создания",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        }
-      }
-    },
-    "User": {
-      "required": [
-        "username",
-        "email"
-      ],
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "ID",
-          "type": "integer",
-          "readOnly": true
-        },
-        "username": {
-          "title": "Username",
-          "description": "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-          "type": "string",
-          "pattern": "^[\\w.@+-]+$",
-          "maxLength": 150,
-          "minLength": 1
-        },
-        "full_name": {
-          "title": "Full name",
-          "type": "string",
-          "readOnly": true
-        },
-        "email": {
-          "title": "Адрес электронной почты",
-          "type": "string",
-          "format": "email",
-          "maxLength": 254,
-          "minLength": 1
-        },
-        "image_url": {
-          "title": "Image url",
-          "type": "string",
-          "format": "uri",
-          "maxLength": 400,
-          "minLength": 1
-        },
-        "is_active": {
-          "title": "Active",
-          "description": "Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
-          "type": "boolean"
-        },
-        "is_staff": {
-          "title": "Staff status",
-          "description": "Designates whether the user can log into this admin site.",
-          "type": "boolean",
-          "readOnly": true
-        },
-        "is_superuser": {
-          "title": "Superuser status",
-          "description": "Designates that this user has all permissions without explicitly assigning them.",
-          "type": "boolean",
-          "readOnly": true
-        },
-        "date_joined": {
-          "title": "Date joined",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true
-        },
-        "last_login": {
-          "title": "Last login",
-          "type": "string",
-          "format": "date-time",
-          "readOnly": true,
-          "x-nullable": true
-        }
-      }
-    }
-  }
 }

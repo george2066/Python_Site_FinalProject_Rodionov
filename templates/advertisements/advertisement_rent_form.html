@@ -15,7 +15,7 @@
     <input type="hidden" name="home" value="{{ advertisement.location.home }}">
     <input type="hidden" name="apartment" value="{{ advertisement.location.apartment }}">
 <h2>Аренда для объявления: {{ advertisement.title }}</h2>
-<form method="post" action="{% url 'rent_create' ad_id=advertisement.id %}">
+<form method="post" action="{% url 'rent_create' ad_id=advertisement.id author_id=request.user.id %}">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Арендовать</button>

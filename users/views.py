@@ -1,11 +1,14 @@
 import os
 
-from django.views.generic import UpdateView, DetailView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_http_methods
+from django.views.generic import DeleteView
+from django.views.generic import DetailView
+from django.views.generic import UpdateView
 
 from advertisements.models import Advertisement
 from diplom import settings
@@ -20,9 +23,7 @@ def load_more_advertisements(request):
     per_page = settings.PAGE_ENTITY
 
     # Все объявления пользователя, кроме первого (которое уже показано)
-    all_ads = Advertisement.objects.filter(author=user).order_by("-created_at")[
-        settings.PAGE_ENTITY :
-    ]
+    all_ads = Advertisement.objects.filter(author=user).order_by("-created_at")[settings.PAGE_ENTITY :]
 
     start = (page - 1) * per_page
     end = start + per_page
@@ -56,13 +57,9 @@ class UserDetailView(LoginRequiredMixin, DetailView):
         user = self.object
 
         # Изначально показываем только 1 объявление
-        advertisements = Advertisement.objects.filter(author=user).order_by(
-            "-created_at"
-        )[: settings.PAGE_ENTITY]
+        advertisements = Advertisement.objects.filter(author=user).order_by("-created_at")[: settings.PAGE_ENTITY]
         context["advertisements"] = advertisements
-        context["total_advertisements"] = Advertisement.objects.filter(
-            author=user
-        ).count()
+        context["total_advertisements"] = Advertisement.objects.filter(author=user).count()
         context["pagination"] = settings.PAGE_ENTITY
         context["image"] = user.image_url
         context["username"] = user.username

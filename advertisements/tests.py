@@ -18,7 +18,6 @@ from advertisements.models import Comment
 from advertisements.models import Location
 from advertisements.models import Rent
 from advertisements.models import Transaction
-from advertisements.views import buy_rent
 from advertisements.views import payment_success
 from users.models import User
 
@@ -64,13 +63,13 @@ class ViewsTestCase(TestCase):
         self.client.login(username="admin", password="pass")
 
     def add_middleware(self, request):
-        # Добавляем middleware для работы messages и session
-        middleware = SessionMiddleware(request)
-        middleware.process_request(request)
+        session_middleware = SessionMiddleware(request)
+        session_middleware.process_request(request)
         request.session.save()
 
-        messages_middleware = MessageMiddleware(request)
-        messages_middleware.process_request(request)
+        message_middleware = MessageMiddleware(request)
+        message_middleware.process_request(request)
+
         return request
 
     def test_advertisement_detail_view(self):
@@ -196,31 +195,64 @@ class ViewsTestCase(TestCase):
         messages_list = list(response.wsgi_request._messages)
         self.assertTrue(any("Одобрено" in str(msg) for msg in messages_list))
 
-    # Yookassa
-    @patch("yookassa.Payment.create")
-    @patch("yookassa.Configuration.account_id", new_callable=property)
-    @patch("yookassa.Configuration.secret_key", new_callable=property)
-    def test_buy_rent_success(self, mock_secret_key, mock_account_id, mock_create_payment):
-        # Настраиваем мок для Payment.create
+    @patch("yookassa.Payment.find_one")
+    @patch("django.shortcuts.get_object_or_404")
+    @patch("advertisements.views.send_message_to_author_queue")
+    def test_payment_success_succeeded(self, mock_send_message, mock_get_object_or_404, mock_find_one):
+        # Настройка mock Payment
         mock_payment = MagicMock()
-        mock_payment.id = "payment_id_123"
-        mock_payment.confirmation.confirmation_url = "http://testurl.com"
-        mock_create_payment.return_value = mock_payment
+        mock_payment.status = "succeeded"
+        mock_payment.metadata = {
+            "advertisement_id": self.ad.id,
+            "rent_id": self.rent.id,
+        }
+        mock_find_one.return_value = mock_payment
 
-        # Создаём запрос
-        request = self.factory.get(reverse("buy_rent", args=[self.ad.id, self.rent.id]))
-        request.user = self.user
-        request.session = {}
+        # Мокаем get_object_or_404 для объявления и аренды
+        def get_obj_side_effect(model, id):
+            if model == Advertisement:
+                return self.ad
+            elif model == Rent:
+                return self.rent
+            raise Exception("Unexpected model")
 
-        # Вызываем функцию
-        response = buy_rent(request, self.ad.id, self.rent.id)
+        mock_get_object_or_404.side_effect = get_obj_side_effect
 
-        # Проверяем редирект на URL оплаты
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], "http://testurl.com")
+        # Создаем запрос
+        request = self.factory.get("/some-url/")
+        request = self.add_middleware(request)
 
-        # Проверяем, что ID платежа сохранён в сессии
-        self.assertEqual(request.session["payment_id"], "payment_id_123")
+        # Устанавливаем сессионные данные
+        request.session["payment_id"] = "test_payment_id"
+        request.session["rent_id"] = self.rent.id
+        request.session["advrtisement_id"] = self.ad.id
+
+        # Вызов метода
+        response = payment_success(request)
+
+        # Проверка статуса
+        self.assertEqual(response.status_code, 200)
+        self.ad.refresh_from_db()
+
+        # Проверка, что объявление помечено как sold
+        self.assertTrue(self.ad.sold)
+        self.rent.refresh_from_db()
+        # Проверка, что аренда помечена как payed
+        self.assertTrue(self.rent.payed)
+
+        # Проверка, что транзакция создана
+        self.assertTrue(Transaction.objects.filter(rent=self.rent).exists())
+
+        # Проверка, что сообщение об успехе добавлено
+        messages_list = list(get_messages(request))
+        self.assertTrue(any("Оплата прошла успешно" in str(msg) for msg in messages_list))
+
+        # Проверка, что отправлено сообщение в очередь
+        mock_send_message.assert_called_once()
+
+        # Проверка, что session очищена
+        self.assertNotIn("payment_id", request.session)
+        self.assertNotIn("rent_id", request.session)
 
     def test_overdue_field_calculation_positive(self):
         # Текущая дата
@@ -248,42 +280,6 @@ class ViewsTestCase(TestCase):
         )
         rent_future.refresh_from_db()
         self.assertFalse(rent_future.overdue, "Поле overdue должно быть False для будущих дат")
-
-    @patch("yookassa.Payment.find_one")
-    def test_payment_success_succeeded(self, mock_find_one):
-        # Настройка mock
-        mock_payment = MagicMock()
-        mock_payment.status = "succeeded"
-        mock_payment.metadata = {
-            "advertisement_id": self.ad.id,
-            "rent_id": self.rent.id,
-        }
-        mock_find_one.return_value = mock_payment
-
-        # Создаем request
-        request = self.factory.get("/some-url/")
-        request = self.add_middleware(request)
-        request.session["payment_id"] = "test_payment_id"
-        request.session["rent_id"] = self.rent.id
-        request.session["advrtisement_id"] = self.ad.id
-
-        # Вызов функции
-        response = payment_success(request)
-
-        # Проверка
-        self.assertEqual(response.status_code, 200)
-        messages_list = list(get_messages(request))
-        self.assertTrue(any("Оплата прошла успешно" in str(msg) for msg in messages_list))
-        # Проверяем, что реквизиты обновлены
-        self.ad.refresh_from_db()
-        self.rent.refresh_from_db()
-        self.assertTrue(self.ad.sold)
-        self.assertTrue(self.rent.payed)
-        # Проверка, что транзакция создана
-        self.assertTrue(Transaction.objects.filter(rent=self.rent).exists())
-        # Проверка, что сессия очищена
-        self.assertNotIn("payment_id", request.session)
-        self.assertNotIn("rent_id", request.session)
 
     @patch("yookassa.Payment.find_one")
     def test_exception_handling(self, mock_find_one):

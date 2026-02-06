@@ -46,7 +46,7 @@ urlpatterns = [
     ),
     path("advertisements/approve/", approve_ad, name="approve"),
     path(
-        "advertisement/<int:ad_id>/rent/add/",
+        "advertisement/<int:ad_id>/<int:author_id>/rent/add/",
         RentCreateView.as_view(),
         name="rent_create",
     ),

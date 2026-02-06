@@ -1,5 +1,3 @@
-import datetime
-
 from django.db import models
 from django.utils.timezone import now
 
@@ -91,7 +89,7 @@ class Rent(models.Model):
 
 
 class Transaction(models.Model):
-    transaction_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата транзакции")
+    transaction_date = models.DateTimeField(default=now, verbose_name="Дата транзакции")
     rent = models.ForeignKey(
         Rent,
         on_delete=models.SET_NULL,
@@ -100,7 +98,7 @@ class Transaction(models.Model):
         related_name="transactions",
         verbose_name="Аренда",
     )
-    created_at = models.DateTimeField(verbose_name="Дата создания", default=datetime.datetime.now())
+    created_at = models.DateTimeField(verbose_name="Дата создания", default=now)
 
     objects = TransactionManager()
 
@@ -110,7 +108,11 @@ class Transaction(models.Model):
         ordering = ["-transaction_date"]
 
     def __str__(self):
-        return f"Транзакция от {self.transaction_date} на сумму {self.advertisement.__dict__['price']}"
+        if self.rent and hasattr(self.rent, "advertisement"):
+            price = self.rent.advertisement.price
+        else:
+            price = "неизвестно"
+        return f"Транзакция от {self.transaction_date} на сумму {price}"
 
 
 class Comment(models.Model):

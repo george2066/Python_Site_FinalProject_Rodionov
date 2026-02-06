@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from django.shortcuts import redirect
+from django.shortcuts import render
 
 from .forms import RegistrationForm
 
@@ -30,8 +32,6 @@ def user_login(request):
             login(request, user)
             return redirect("home")
         else:
-            return render(
-                request, "registration/login.html", {"error_message": "Invalid login"}
-            )
+            return render(request, "registration/login.html", {"error_message": "Invalid login"})
     else:
         return render(request, "registration/login.html")

@@ -1,11 +1,9 @@
 from django.urls import path
 
-from users.views import (
-    UserDetailView,
-    UserUpdateView,
-    UserDeleteView,
-    load_more_advertisements,
-)
+from users.views import load_more_advertisements
+from users.views import UserDeleteView
+from users.views import UserDetailView
+from users.views import UserUpdateView
 
 urlpatterns = [
     path("profile/", UserDetailView.as_view(), name="profile"),

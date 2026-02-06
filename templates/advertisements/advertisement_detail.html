@@ -17,7 +17,7 @@
             <a href="{% url 'advertisement-update' object.id %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
             <a href="{% url 'advertisement-delete' object.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
         {% else %}
-            <a href="{% url 'rent_create' object.id %}" class="btn btn-primary">Арендовать</a>
+            <a href="{% url 'rent_create' object.id request.user.id %}" class="btn btn-primary">Арендовать</a>
         {% endif %}
 
         <a href="{% url 'advertisements' %}" class="btn btn-secondary">Назад к списку</a>

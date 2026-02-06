@@ -1,6 +1,8 @@
 from django import forms
 
-from advertisements.models import Advertisement, Comment, Rent
+from advertisements.models import Advertisement
+from advertisements.models import Comment
+from advertisements.models import Rent
 
 """
 Variant №1
