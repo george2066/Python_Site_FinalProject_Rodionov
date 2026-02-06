@@ -1,0 +1,54 @@
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: "v6.0.0"
+      hooks:
+        - id: check-merge-conflict
+        - id: debug-statements
+
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.15.0
+      hooks:
+        - id: ruff-check
+          types_or: [ python, pyi ]
+          args: [ --fix ]
+
+        - id: ruff-format
+          types_or: [ python, pyi ]
+
+    - repo: local
+      exclude: '(^|.*/)migrations(/|$)'
+      hooks:
+
+        - id: black
+          name: black
+          entry: black
+          language: system
+          types: [python]
+          args: [--line-length=200, --target-version=py311]
+
+        - id: autoflake
+          name: autoflake
+          entry: autoflake
+          language: system
+          types: [python]
+          args: [--in-place, --remove-all-unused-imports, --remove-duplicate-keys]
+
+        - id: pyupgrade
+          name: pyupgrade
+          entry: pyupgrade
+          language: system
+          types: [python]
+          args: [--py37-plus]
+
+        - id: reorder-python-imports
+          name: reorder-python-imports
+          entry: reorder-python-imports
+          language: system
+          types: [python]
+          args: [--py311-plus]
+
+        - id: yesqa
+          name: yesqa
+          entry: yesqa
+          language: system
+          types: [python]
