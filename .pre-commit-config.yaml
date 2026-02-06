@@ -16,7 +16,6 @@ repos:
           types_or: [ python, pyi ]
 
     - repo: local
-      exclude: '(^|.*/)migrations(/|$)'
       hooks:
 
         - id: black
