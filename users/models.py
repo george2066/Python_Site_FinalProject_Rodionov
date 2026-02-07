@@ -6,7 +6,7 @@ from users import avatar_default
 
 # Create your models here.
 class User(AbstractUser):
-    image_url = models.URLField(max_length=400, default=avatar_default)
+    image_url = models.URLField(max_length=500, default=avatar_default)
     email = models.EmailField(unique=True, verbose_name="Адрес электронной почты")
     telegram = models.CharField(max_length=255, null=True, blank=True)
     chat_id = models.BigIntegerField(null=True, blank=True)

@@ -30,7 +30,7 @@ class Location(models.Model):
 
 
 class Advertisement(models.Model):
-    image_url = models.URLField(max_length=200, blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
     title = models.CharField(max_length=200, verbose_name="Название")
     category = models.ForeignKey(
         Category, models.SET_NULL, null=True, blank=True, verbose_name="Категория"
