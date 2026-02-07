@@ -14,6 +14,7 @@ class RegistrationForm(UserCreationForm):
             "first_name",
             "last_name",
             "username",
+            "telegram",
             "email",
             "password1",
             "password2",

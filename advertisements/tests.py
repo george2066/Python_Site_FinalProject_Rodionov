@@ -30,7 +30,9 @@ class ViewsTestCase(TestCase):
         self.client = Client()
         # Создаём тестового пользователя
         self.user = User.objects.create_user(username="testuser", password="testpass")
-        self.admin = User.objects.create_superuser(username="admin", email="admin@example.com", password="pass")
+        self.admin = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="pass"
+        )
         # Создаем категорию
         category = Category.objects.create(name="Test Category")
         # Создаём объявление
@@ -82,7 +84,9 @@ class ViewsTestCase(TestCase):
         url = reverse("advertisement", kwargs={"pk": self.ad.pk})
         self.client.login(username="testuser", password="testpass")
         response = self.client.post(url, {"comment": "Test comment"})
-        self.assertEqual(response.status_code, 302)  # редирект после успешного добавления
+        self.assertEqual(
+            response.status_code, 302
+        )  # редирект после успешного добавления
         self.assertTrue(Comment.objects.filter(comment="Test comment").exists())
 
     def test_edit_comment(self):
@@ -110,7 +114,9 @@ class ViewsTestCase(TestCase):
         )
         url = reverse("delete_comment")  # укажите правильный URL
         self.client.login(username="testuser", password="testpass")
-        response = self.client.post(url, json.dumps({"comment_id": comment.pk}), content_type="application/json")
+        response = self.client.post(
+            url, json.dumps({"comment_id": comment.pk}), content_type="application/json"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Comment.objects.filter(pk=comment.pk).exists())
 
@@ -180,7 +186,9 @@ class ViewsTestCase(TestCase):
             location=self.location,
             author=self.user,
         )
-        response = self.client.post("/advertisements/approve/", data={"approve_ad": [str(ad1.id), str(ad2.id)]})
+        response = self.client.post(
+            "/advertisements/approve/", data={"approve_ad": [str(ad1.id), str(ad2.id)]}
+        )
         self.assertEqual(302, response.status_code)
 
         ad1.refresh_from_db()
@@ -198,7 +206,9 @@ class ViewsTestCase(TestCase):
     @patch("yookassa.Payment.find_one")
     @patch("django.shortcuts.get_object_or_404")
     @patch("advertisements.views.send_message_to_author_queue")
-    def test_payment_success_succeeded(self, mock_send_message, mock_get_object_or_404, mock_find_one):
+    def test_payment_success_succeeded(
+        self, mock_send_message, mock_get_object_or_404, mock_find_one
+    ):
         # Настройка mock Payment
         mock_payment = MagicMock()
         mock_payment.status = "succeeded"
@@ -245,7 +255,9 @@ class ViewsTestCase(TestCase):
 
         # Проверка, что сообщение об успехе добавлено
         messages_list = list(get_messages(request))
-        self.assertTrue(any("Оплата прошла успешно" in str(msg) for msg in messages_list))
+        self.assertTrue(
+            any("Оплата прошла успешно" in str(msg) for msg in messages_list)
+        )
 
         # Проверка, что отправлено сообщение в очередь
         mock_send_message.assert_called_once()
@@ -266,7 +278,9 @@ class ViewsTestCase(TestCase):
             to_date=today.replace(day=1) - timedelta(days=1),  # вчера
         )
         rent_past.refresh_from_db()
-        self.assertTrue(rent_past.overdue, "Поле overdue должно быть True для прошедших дат")
+        self.assertTrue(
+            rent_past.overdue, "Поле overdue должно быть True для прошедших дат"
+        )
 
     def test_overdue_field_calculation_negative(self):
         today = datetime.now().date()
@@ -279,7 +293,9 @@ class ViewsTestCase(TestCase):
             to_date=future_date,
         )
         rent_future.refresh_from_db()
-        self.assertFalse(rent_future.overdue, "Поле overdue должно быть False для будущих дат")
+        self.assertFalse(
+            rent_future.overdue, "Поле overdue должно быть False для будущих дат"
+        )
 
     @patch("yookassa.Payment.find_one")
     def test_exception_handling(self, mock_find_one):
@@ -294,7 +310,9 @@ class ViewsTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         messages_list = list(get_messages(request))
-        self.assertTrue(any("Ошибка проверки платежа" in str(msg) for msg in messages_list))
+        self.assertTrue(
+            any("Ошибка проверки платежа" in str(msg) for msg in messages_list)
+        )
         # Проверка, что объекты не обновлены
         self.ad.refresh_from_db()
         self.rent.refresh_from_db()

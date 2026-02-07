@@ -12,8 +12,13 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get("username")
+            telegram = form.cleaned_data.get("telegram")
             raw_password = form.cleaned_data.get("password1")
-            user = authenticate(username=username, password=raw_password)
+            user = authenticate(
+                username=username,
+                password=raw_password,
+                telegram=telegram,
+            )
             login(request, user)
             return redirect("home")
         else:
@@ -32,6 +37,8 @@ def user_login(request):
             login(request, user)
             return redirect("home")
         else:
-            return render(request, "registration/login.html", {"error_message": "Invalid login"})
+            return render(
+                request, "registration/login.html", {"error_message": "Invalid login"}
+            )
     else:
         return render(request, "registration/login.html")

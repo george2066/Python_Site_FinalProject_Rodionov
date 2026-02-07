@@ -55,7 +55,9 @@ class AdvertisementViewSet(ModelViewSet):
         """При обновлении проверяем, что автор — текущий пользователь (или админ)"""
         instance = self.get_object()
         if instance.author != self.request.user and not self.request.user.is_staff:
-            self.permission_denied(self.request, message="Вы не можете редактировать это объявление.")
+            self.permission_denied(
+                self.request, message="Вы не можете редактировать это объявление."
+            )
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
@@ -127,7 +129,9 @@ class UserViewSet(ModelViewSet):
         """Обновление: только сам пользователь или админ"""
         instance = self.get_object()
         if instance != self.request.user and not self.request.user.is_staff:
-            self.permission_denied(self.request, message="Вы не можете редактировать этого пользователя.")
+            self.permission_denied(
+                self.request, message="Вы не можете редактировать этого пользователя."
+            )
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
@@ -298,7 +302,9 @@ class CommentViewSet(ModelViewSet):
     ]
     search_fields = ["comment"]
     ordering_fields = ["create_at", "update_at"]
-    ordering = ["-create_at"]  # сортировка по умолчанию — по дате создания, newest first
+    ordering = [
+        "-create_at"
+    ]  # сортировка по умолчанию — по дате создания, newest first
 
     def get_permissions(self):
         """

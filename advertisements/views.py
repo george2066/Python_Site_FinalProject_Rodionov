@@ -107,8 +107,12 @@ def payment_success(request):
         if payment.status == "succeeded":
             metadata = payment.metadata
             advertisement_id = metadata.get("advertisement_id")
-            rent_id_from_metadata = metadata.get("rent_id")  # Можно использовать, если есть
-            advertisement_id_from_metadata = metadata.get("advertisement_id")  # Можно использовать, если есть
+            rent_id_from_metadata = metadata.get(
+                "rent_id"
+            )  # Можно использовать, если есть
+            advertisement_id_from_metadata = metadata.get(
+                "advertisement_id"
+            )  # Можно использовать, если есть
 
             # Или использовать rent_id из сессии
             rent_id_to_use = rent_id or rent_id_from_metadata
@@ -127,11 +131,15 @@ def payment_success(request):
             renter = rent.renter
             queue = "rent_create"
             # Создаем транзакцию
-            transaction = Transaction.objects.create(rent=rent, created_at=timezone.now())
+            transaction = Transaction.objects.create(
+                rent=rent, created_at=timezone.now()
+            )
 
             json_messages = json.dumps(
                 {
-                    "author_advertisement": str(advertisement.author.id),  # убедитесь, что это сериализуемо
+                    "author_advertisement": str(
+                        advertisement.author.id
+                    ),  # убедитесь, что это сериализуемо
                     "renter": str(renter.id),  # или сериализуйте по необходимости
                     "advertisement": str(advertisement.id),  # если необходимо
                 }
@@ -139,7 +147,9 @@ def payment_success(request):
 
             send_message_to_author_queue(queue, json_messages)
 
-            messages.success(request, f"Оплата прошла успешно! ID транзакции: {transaction.id}")
+            messages.success(
+                request, f"Оплата прошла успешно! ID транзакции: {transaction.id}"
+            )
         else:
             messages.error(request, f"Платёж не завершён (статус: {payment.status})")
     except Exception as e:
@@ -211,7 +221,9 @@ def edit_comment(request):
         comment.save()
         return JsonResponse({"success": True})
     except Exception:
-        return JsonResponse({"success": False, "error": "Комментарий не найден или недоступен"})
+        return JsonResponse(
+            {"success": False, "error": "Комментарий не найден или недоступен"}
+        )
 
 
 @csrf_exempt
@@ -224,7 +236,9 @@ def delete_comment(request):
             comment.delete()
             return JsonResponse({"success": True})
         except Exception:
-            return JsonResponse({"success": False, "error": "Комментарий не найден или недоступен"})
+            return JsonResponse(
+                {"success": False, "error": "Комментарий не найден или недоступен"}
+            )
     return JsonResponse({"success": False, "error": "Некорректный метод"})
 
 

@@ -8,6 +8,9 @@ from users import avatar_default
 class User(AbstractUser):
     image_url = models.URLField(max_length=400, default=avatar_default)
     email = models.EmailField(unique=True, verbose_name="Адрес электронной почты")
+    telegram = models.CharField(max_length=255, null=True, blank=True)
+    chat_id = models.BigIntegerField(null=True, blank=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]

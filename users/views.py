@@ -23,7 +23,9 @@ def load_more_advertisements(request):
     per_page = settings.PAGE_ENTITY
 
     # Все объявления пользователя, кроме первого (которое уже показано)
-    all_ads = Advertisement.objects.filter(author=user).order_by("-created_at")[settings.PAGE_ENTITY :]
+    all_ads = Advertisement.objects.filter(author=user).order_by("-created_at")[
+        settings.PAGE_ENTITY :
+    ]
 
     start = (page - 1) * per_page
     end = start + per_page
@@ -57,22 +59,35 @@ class UserDetailView(LoginRequiredMixin, DetailView):
         user = self.object
 
         # Изначально показываем только 1 объявление
-        advertisements = Advertisement.objects.filter(author=user).order_by("-created_at")[: settings.PAGE_ENTITY]
+        advertisements = Advertisement.objects.filter(author=user).order_by(
+            "-created_at"
+        )[: settings.PAGE_ENTITY]
         context["advertisements"] = advertisements
-        context["total_advertisements"] = Advertisement.objects.filter(author=user).count()
+        context["total_advertisements"] = Advertisement.objects.filter(
+            author=user
+        ).count()
         context["pagination"] = settings.PAGE_ENTITY
         context["image"] = user.image_url
         context["username"] = user.username
         context["email"] = user.email
         context["first_name"] = user.first_name
         context["last_name"] = user.last_name
+        context["telegram"] = user.telegram
 
         return context
 
 
 class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
-    fields = ["username", "email", "first_name", "last_name", "image_url"]
+    fields = [
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "image_url",
+        "telegram",
+        "phone",
+    ]
     template_name = os.path.join("users", "profile_update.html")
     success_url = reverse_lazy("profile")
 
