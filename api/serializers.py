@@ -62,6 +62,9 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "full_name",
+            "phone",
+            "telegram",
+            "chat_id",
             "email",
             "image_url",
             "is_active",
@@ -185,11 +188,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     rent_id = serializers.PrimaryKeyRelatedField(
-        source="rent", queryset=Rent.objects.all(), read_only=False
+        source="rent", queryset=Rent.objects.all(), allow_null=True
     )
     transaction_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    advertisement_price = serializers.SerializerMethodField()
+    rent_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Transaction
@@ -197,15 +200,15 @@ class TransactionSerializer(serializers.ModelSerializer):
             "id",
             "transaction_date",
             "rent_id",
+            "rent_price",
             "created_at",
-            "advertisement_price",
         ]
 
-    def get_advertisement_price(self, obj):
-        # Получение цены из связанной аренды через rent
-        if obj.rent and obj.rent.advertisement:
+    def get_rent_price(self, obj):
+        # Получение цены аренды через связанный rent и advertisement
+        if obj.rent and hasattr(obj.rent, "advertisement"):
             return obj.rent.advertisement.price
-        return None
+        return "неизвестно"
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -228,39 +228,30 @@ class TransactionViewSet(ModelViewSet):
     API для управления транзакциями (CRUD).
     """
 
-    queryset = Transaction.objects.select_related("user", "advertisement").all()
+    queryset = Transaction.objects.select_related("rent__advertisement").all()
     serializer_class = TransactionSerializer
-    filter_backends = [
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    ]
-    search_fields = ["user__username", "advertisement__title"]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["rent__advertisement__title"]
     ordering_fields = ["transaction_date", "created_at"]
-    ordering = ["-transaction_date"]  # Новые транзакции сверху
-    pagination_class = None  # Подключите PageNumberPagination при необходимости
+    ordering = ["-transaction_date"]
+    pagination_class = None  # Можно подключить Pagination, если нужно
 
     def get_permissions(self):
-        """
-        Права доступа:
-        - Создание/обновление/удаление: только админ или владелец транзакции (если логика позволяет).
-        - Чтение: все авторизованные пользователи (или только админ, если требуется).
-        """
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            return [IsAdminUser()]  # Только админ может изменять транзакции
-        return [IsAuthenticated()]  # Чтение доступно всем авторизованным
+            return [IsAdminUser()]  # Только админ может изменять
+        return [IsAuthenticated()]  # Остальные — авторизованные пользователи
 
     def perform_create(self, serializer):
-        """Дополнительная логика при создании (если нужна)"""
+        # Можно добавить логику при создании, например, установить текущего пользователя
         serializer.save()
 
     def perform_update(self, serializer):
-        """Дополнительная логика при обновлении (если нужна)"""
+        # Аналогично для обновления
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
-        """Удаление транзакции с проверкой прав"""
         instance = self.get_object()
-        # Пример: только админ может удалять транзакции
+        # Ограничение на удаление: только админ
         if not request.user.is_staff:
             return Response(
                 {"error": "У вас нет прав на удаление этой транзакции."},
@@ -271,19 +262,20 @@ class TransactionViewSet(ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="my")
     def my_transactions(self, request):
-        """Возвращает транзакции текущего пользователя"""
-        queryset = self.filter_queryset(self.get_queryset().filter(user=request.user))
+        """Получить транзакции текущего пользователя"""
+        queryset = self.filter_queryset(
+            self.get_queryset().filter(rent__advertisement__owner=request.user)
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=["get"], url_path="details")
     def transaction_details(self, request, pk=None):
-        """Возвращает детали транзакции с дополнительной информацией"""
+        """Получить детальную информацию о транзакции"""
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
