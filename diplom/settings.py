@@ -85,14 +85,14 @@ WSGI_APPLICATION = "diplom.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-"""DATABASES = {
+DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
-}"""
+}
 
-DB_NAME = os.getenv("DB_NAME")
+"""DB_NAME = os.getenv("DB_NAME")
 USER_DB = os.getenv("USER_DB")
 PASSWORD_DB = os.getenv("PASSWORD_DB")
 
@@ -106,7 +106,7 @@ DATABASES = {
         "PORT": "5432",
     }
 }
-
+"""
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

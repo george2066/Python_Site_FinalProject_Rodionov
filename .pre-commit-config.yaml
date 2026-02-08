@@ -36,3 +36,11 @@ repos:
           entry: yesqa
           language: system
           types: [python]
+
+        - id: pytest
+          name: pytest
+          entry: pytest
+          language: system
+          types: [ python ]
+          pass_filenames: false
+          always_run: true
