@@ -1,5 +1,5 @@
 run:
-	python manage.py runserver
+	uvicorn diplom.asgi:application --host 0.0.0.0 --port 8000
 
 migrations:
 	python manage.py makemigrations $(app) -n '$(name)'
