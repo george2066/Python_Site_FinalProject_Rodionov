@@ -31,6 +31,7 @@ from advertisements.forms import RentForm
 from advertisements.models import Advertisement
 from advertisements.models import Comment
 from advertisements.models import Location
+from advertisements.models import PaymentLog
 from advertisements.models import Rent
 from advertisements.models import Transaction
 from diplom import settings
@@ -54,17 +55,14 @@ def contact(request):
 
 
 def buy_rent(request, ad_id, rent_id):
-    # Получаем объявление
     advertisement = get_object_or_404(Advertisement, id=ad_id)
 
-    # Настраиваем подключение к ЮКассе
     Configuration.account_id = settings.YOOKASSA_SHOP_ID
     Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
 
-    # Параметры платежа
     payment_data = {
         "amount": {
-            "value": str(advertisement.price),  # Сумма из объявления
+            "value": str(advertisement.price),
             "currency": "RUB",
         },
         "confirmation": {
@@ -77,15 +75,12 @@ def buy_rent(request, ad_id, rent_id):
     }
 
     try:
-        # Создаём платёж
         payment = Payment.create(payment_data)
 
-        # Сохраняем ID платежа в сессии (для проверки позже)
         request.session["advertisement_id"] = ad_id
         request.session["payment_id"] = payment.id
         request.session["rent_id"] = rent_id
 
-        # Переводим пользователя на страницу оплаты
         return redirect(payment.confirmation.confirmation_url)
 
     except Exception as e:
@@ -102,47 +97,43 @@ def payment_success(request):
         messages.error(request, "Платёж не найден.")
         return redirect("home")
 
+    if PaymentLog.objects.filter(payment_id=payment_id).exists():
+        messages.warning(request, "Этот платёж уже был обработан.")
+        return redirect("advertisements")
+
     try:
         payment = Payment.find_one(payment_id)
 
         if payment.status == "succeeded":
             metadata = payment.metadata
             advertisement_id = metadata.get("advertisement_id")
-            rent_id_from_metadata = metadata.get(
-                "rent_id"
-            )  # Можно использовать, если есть
-            advertisement_id_from_metadata = metadata.get(
-                "advertisement_id"
-            )  # Можно использовать, если есть
+            rent_id_from_metadata = metadata.get("rent_id")
+            advertisement_id_from_metadata = metadata.get("advertisement_id")
 
-            # Или использовать rent_id из сессии
             rent_id_to_use = rent_id or rent_id_from_metadata
             advertisement_id_to_use = advertisement_id or advertisement_id_from_metadata
 
-            # Обновляем объявление
             advertisement = get_object_or_404(Advertisement, id=advertisement_id_to_use)
             advertisement.sold = True
             advertisement.save()
 
-            # Обновляем аренду
             rent = get_object_or_404(Rent, id=rent_id_to_use)
             rent.payed = True
             rent.save()
 
             renter = rent.renter
             queue = "rent_create"
-            # Создаем транзакцию
             transaction = Transaction.objects.create(
                 rent=rent, created_at=timezone.now()
             )
 
+            PaymentLog.objects.create(payment_id=payment_id)
+
             json_messages = json.dumps(
                 {
-                    "author_advertisement": str(
-                        advertisement.author.id
-                    ),  # убедитесь, что это сериализуемо
-                    "renter": str(renter.id),  # или сериализуйте по необходимости
-                    "advertisement": str(advertisement.id),  # если необходимо
+                    "author_advertisement": str(advertisement.author.id),
+                    "renter": str(renter.id),
+                    "advertisement": str(advertisement.id),
                 }
             )
 
@@ -157,13 +148,11 @@ def payment_success(request):
         logger.error(f"Ошибка при обработке платежа {payment_id}: {e}")
         messages.error(request, f"Ошибка проверки платежа: {e}")
 
-    # Очистка сессии
     if "payment_id" in request.session:
         del request.session["payment_id"]
     if "rent_id" in request.session:
         del request.session["rent_id"]
 
-    # возвращает список объявлений или другую страницу
     advertisements = Advertisement.objects.all()
     context = {"advertisements": advertisements}
 
@@ -178,30 +167,24 @@ def payment_success(request):
 def yookassa_webhook(request):
     if request.method == "POST":
         data = json.loads(request.body)
-        # Обрабатываем событие (например, payment.succeeded)
         if data["event"] == "payment.succeeded":
             payment = data["object"]
-            # Обновляем БД: отмечаем заказ как оплаченный
         return JsonResponse({"status": "ok"})
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
 def approve_ad(request):
-    # Получаем все неодобренные объявления
     advertisements = Advertisement.objects.filter(is_approved=False)
     advertisemtnts = advertisements.filter(sold=False)
 
     if request.method == "POST":
-        # Получаем список ID из чекбоксов (name="approve_ad")
         approved_ids = request.POST.getlist("approve_ad")
 
-        # Обновляем только выбранные объявления
         Advertisement.objects.filter(id__in=approved_ids).update(is_approved=True)
 
-        # Добавляем сообщение об успехе (опционально)
         messages.success(request, f"Одобрено {len(approved_ids)} объявлений.")
 
-        return redirect("advertisements")  # Редирект на ту же страницу
+        return redirect("advertisements")
 
     return render(
         request,
@@ -255,10 +238,8 @@ def send_message_to_author_queue(queue_name, message):
     connection = pika.BlockingConnection(connection_params)
     channel = connection.channel()
 
-    # Объявляем очередь с динамическим именем
     channel.queue_declare(queue=queue_name, durable=True)
 
-    # Отправляем сообщение в указанную очередь
     channel.basic_publish(
         exchange="",
         routing_key=queue_name,
@@ -271,7 +252,6 @@ def send_message_to_author_queue(queue_name, message):
     connection.close()
 
 
-# Create your views here.
 class AdvertisementsUserListView(LoginRequiredMixin, ListView):
     login_url = reverse_lazy("account_login")
 
@@ -287,17 +267,14 @@ class AdvertisementDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         advertisement = self.object
 
-        # Добавляем данные объявления
         context["image"] = advertisement.image_url
         context["title"] = advertisement.title
         context["category"] = advertisement.category
         context["author_id"] = advertisement.author
         context["description"] = advertisement.description
 
-        # Форма для комментария
         context["comment_form"] = CommentForm()
 
-        # Список комментариев к объявлению
         context["comments"] = advertisement.comments.all().order_by("-create_at")
 
         return context
@@ -313,7 +290,6 @@ class AdvertisementDetailView(DetailView):
             comment.save()
             return redirect(self.get_success_url())
 
-        # Если форма невалидна — возвращаем в контекст с ошибками
         context = self.get_context_data()
         context["comment_form"] = form
         return self.render_to_response(context)
@@ -367,10 +343,8 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Получаем все одобренные не проданные объявления
         advertisements = filter_advertisements()
 
-        # Фильтр по цене
         min_price = self.request.GET.get("min_price")
         max_price = self.request.GET.get("max_price")
         if min_price:
@@ -384,12 +358,10 @@ class HomePageView(TemplateView):
             except ValueError:
                 pass
 
-        # Фильтр по локации
         city = self.request.GET.get("city")
         if city:
             advertisements = advertisements.filter(location__city__iexact=city)
 
-        # Настройка пагинации (10 объявлений на страницу)
         paginator = Paginator(advertisements, settings.PAGE_ENTITY)
         page_number = self.request.GET.get("page")
         page_obj = paginator.get_page(page_number)
@@ -401,7 +373,6 @@ class HomePageView(TemplateView):
         context["max_price"] = max_price
         context["city"] = city
 
-        # Получаем список городов для фильтра
         context["cities"] = (
             Location.objects.values_list("city", flat=True)
             .distinct()
@@ -422,7 +393,7 @@ class RentListView(LoginRequiredMixin, ListView):
 class SearchResultsView(ListView):
     model = Advertisement
     context_object_name = "advertisements"
-    paginate_by = settings.PAGE_ENTITY  # 10 объявлений на страницу
+    paginate_by = settings.PAGE_ENTITY
 
     def get_queryset(self):
         query = self.request.GET.get("q")
@@ -453,7 +424,6 @@ class RentCreateView(CreateView):
         return context
 
     def form_valid(self, form):
-        # Устанавливаем связь с объявлением
         ad_id = self.kwargs["ad_id"]
         renter_id = self.kwargs["author_id"]
 
@@ -465,7 +435,6 @@ class RentCreateView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        # После сохранения аренды перенаправляем на страницу оплаты
         return reverse(
             "buy_rent",
             kwargs={"ad_id": self.object.advertisement.id, "rent_id": self.object.id},

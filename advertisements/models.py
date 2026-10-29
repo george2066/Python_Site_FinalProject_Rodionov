@@ -10,7 +10,6 @@ from advertisements.managers import TransactionManager
 from users.models import User
 
 
-# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=255)
     date = models.DateTimeField(auto_now=True)
@@ -45,7 +44,7 @@ class Advertisement(models.Model):
     )
     contact_email = models.EmailField(
         blank=True, verbose_name="Контактный email"
-    )  # Добавил поле email
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -89,12 +88,8 @@ class Rent(models.Model):
     objects = RentManager()
 
     def save(self, *args, **kwargs):
-        if not self.pk or kwargs.get(
-            "force_update", False
-        ):  # проверяем, не новый ли объект
-            today = (
-                now().date()
-            )  # используем timezone.now(), чтобы учитывать часовой пояс
+        if not self.pk or kwargs.get("force_update", False):
+            today = now().date()
             self.overdue = today > self.to_date
         super().save(*args, **kwargs)
 
@@ -127,6 +122,23 @@ class Transaction(models.Model):
         else:
             price = "неизвестно"
         return f"Транзакция от {self.transaction_date} на сумму {price}"
+
+
+class PaymentLog(models.Model):
+    payment_id = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="ID платежа ЮKassa",
+        db_index=True,
+    )
+    created_at = models.DateTimeField(verbose_name="Дата обработки", default=now)
+
+    class Meta:
+        verbose_name = "Лог платежа"
+        verbose_name_plural = "Логи платежей"
+
+    def __str__(self):
+        return f"Payment {self.payment_id} at {self.created_at}"
 
 
 class Comment(models.Model):

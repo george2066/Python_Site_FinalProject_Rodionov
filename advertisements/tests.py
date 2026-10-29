@@ -84,9 +84,7 @@ class ViewsTestCase(TestCase):
         url = reverse("advertisement", kwargs={"pk": self.ad.pk})
         self.client.login(username="testuser", password="testpass")
         response = self.client.post(url, {"comment": "Test comment"})
-        self.assertEqual(
-            response.status_code, 302
-        )  # редирект после успешного добавления
+        self.assertEqual(response.status_code, 302)
         self.assertTrue(Comment.objects.filter(comment="Test comment").exists())
 
     def test_edit_comment(self):
@@ -159,7 +157,7 @@ class ViewsTestCase(TestCase):
                 "title": "New Ad",
                 "description": "Desc",
                 "price": 50,
-                "category": 1,  # укажите существующую категорию
+                "category": 1,
                 "image_url": "http://example.com/image2.jpg",
                 "city": "TestCity",
                 "street": "TestStreet",
@@ -200,12 +198,9 @@ class ViewsTestCase(TestCase):
         ad1.refresh_from_db()
         ad2.refresh_from_db()
 
-        # Проверка, что они одобрены
         self.assertTrue(ad1.is_approved)
         self.assertTrue(ad2.is_approved)
 
-        # Проверка сообщения (если есть)
-        # Можно проверить сообщения через messages framework, например:
         messages_list = list(response.wsgi_request._messages)
         self.assertTrue(any("Одобрено" in str(msg) for msg in messages_list))
 
@@ -215,7 +210,6 @@ class ViewsTestCase(TestCase):
     def test_payment_success_succeeded(
         self, mock_send_message, mock_get_object_or_404, mock_find_one
     ):
-        # Настройка mock Payment
         mock_payment = MagicMock()
         mock_payment.status = "succeeded"
         mock_payment.metadata = {
@@ -224,7 +218,6 @@ class ViewsTestCase(TestCase):
         }
         mock_find_one.return_value = mock_payment
 
-        # Мокаем get_object_or_404 для объявления и аренды
         def get_obj_side_effect(model, id):
             if model == Advertisement:
                 return self.ad
@@ -234,63 +227,48 @@ class ViewsTestCase(TestCase):
 
         mock_get_object_or_404.side_effect = get_obj_side_effect
 
-        # Создаем запрос
         request = self.factory.get("/some-url/")
         request = self.add_middleware(request)
 
-        # Устанавливаем сессионные данные
         request.session["payment_id"] = "test_payment_id"
         request.session["rent_id"] = self.rent.id
         request.session["advrtisement_id"] = self.ad.id
 
-        # Вызов метода
         response = payment_success(request)
 
-        # Проверка статуса
         self.assertEqual(response.status_code, 200)
         self.ad.refresh_from_db()
 
-        # Проверка, что объявление помечено как sold
         self.assertTrue(self.ad.sold)
         self.rent.refresh_from_db()
-        # Проверка, что аренда помечена как payed
         self.assertTrue(self.rent.payed)
 
-        # Проверка, что транзакция создана
         self.assertTrue(Transaction.objects.filter(rent=self.rent).exists())
 
-        # Проверка, что сообщение об успехе добавлено
         messages_list = list(get_messages(request))
         self.assertTrue(
             any("Оплата прошла успешно" in str(msg) for msg in messages_list)
         )
 
-        # Проверка, что отправлено сообщение в очередь
         mock_send_message.assert_called_once()
 
-        # Проверка, что session очищена
         self.assertNotIn("payment_id", request.session)
         self.assertNotIn("rent_id", request.session)
 
     def test_overdue_field_calculation_positive(self):
-        # Текущая дата
         today = datetime.now().date()
 
-        # Создаем аренду с датой окончания в прошлом — overdue должно стать True
         rent_past = Rent.objects.create(
             advertisement=self.ad,
             renter=self.user,
-            from_date=today.replace(day=1),  # произвольно
-            to_date=today.replace(day=1) - timedelta(days=1),  # вчера
+            from_date=today.replace(day=1),
+            to_date=today.replace(day=1) - timedelta(days=1),
         )
         rent_past.refresh_from_db()
-        self.assertTrue(
-            rent_past.overdue, "Поле overdue должно быть True для прошедших дат"
-        )
+        self.assertTrue(rent_past.overdue)
 
     def test_overdue_field_calculation_negative(self):
         today = datetime.now().date()
-        # Создаем аренду с датой окончания в будущем — overdue должно стать False
         future_date = today + timedelta(days=10)
         rent_future = Rent.objects.create(
             advertisement=self.ad,
@@ -299,9 +277,7 @@ class ViewsTestCase(TestCase):
             to_date=future_date,
         )
         rent_future.refresh_from_db()
-        self.assertFalse(
-            rent_future.overdue, "Поле overdue должно быть False для будущих дат"
-        )
+        self.assertFalse(rent_future.overdue)
 
     @patch("yookassa.Payment.find_one")
     def test_exception_handling(self, mock_find_one):
@@ -319,15 +295,12 @@ class ViewsTestCase(TestCase):
         self.assertTrue(
             any("Ошибка проверки платежа" in str(msg) for msg in messages_list)
         )
-        # Проверка, что объекты не обновлены
         self.ad.refresh_from_db()
         self.rent.refresh_from_db()
         self.assertFalse(self.ad.sold)
         self.assertFalse(self.rent.payed)
 
-    # Tests for filters
     def setUpFilters(self):
-        # Создаём дополнительные объявления с разными ценами и городами
         self.location_msk = Location.objects.create(
             city="Москва", street="Ленина", home="1"
         )
@@ -370,11 +343,9 @@ class ViewsTestCase(TestCase):
         )
 
     def test_filter_by_price_min(self):
-        """Фильтр по минимальной цене"""
         self.setUpFilters()
         response = self.client.get(reverse("advertisements"), {"min_price": "900"})
         self.assertEqual(response.status_code, 200)
-        # Должны быть только объявления с ценой >= 900
         ads_in_context = list(response.context["advertisements"])
         ad_titles = [ad.title for ad in ads_in_context]
         self.assertIn("Medium Ad", ad_titles)
@@ -382,11 +353,9 @@ class ViewsTestCase(TestCase):
         self.assertNotIn("Cheap Ad", ad_titles)
 
     def test_filter_by_price_max(self):
-        """Фильтр по максимальной цене"""
         self.setUpFilters()
         response = self.client.get(reverse("advertisements"), {"max_price": "1000"})
         self.assertEqual(response.status_code, 200)
-        # Должны быть только объявления с ценой <= 1000
         ads_in_context = list(response.context["advertisements"])
         ad_titles = [ad.title for ad in ads_in_context]
         self.assertIn("Test Ad", ad_titles)
@@ -395,7 +364,6 @@ class ViewsTestCase(TestCase):
         self.assertNotIn("Expensive Ad", ad_titles)
 
     def test_filter_by_price_min_and_max(self):
-        """Фильтр по диапазону цен"""
         self.setUpFilters()
         response = self.client.get(
             reverse("advertisements"), {"min_price": "50", "max_price": "2000"}
@@ -403,13 +371,12 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         ads_in_context = list(response.context["advertisements"])
         ad_titles = [ad.title for ad in ads_in_context]
-        self.assertIn("Test Ad", ad_titles)  # цена 100
-        self.assertIn("Cheap Ad", ad_titles)  # цена 100
-        self.assertIn("Medium Ad", ad_titles)  # цена 1000
-        self.assertNotIn("Expensive Ad", ad_titles)  # цена 5000
+        self.assertIn("Test Ad", ad_titles)
+        self.assertIn("Cheap Ad", ad_titles)
+        self.assertIn("Medium Ad", ad_titles)
+        self.assertNotIn("Expensive Ad", ad_titles)
 
     def test_filter_by_city(self):
-        """Фильтр по городу"""
         self.setUpFilters()
         response = self.client.get(reverse("advertisements"), {"city": "Москва"})
         self.assertEqual(response.status_code, 200)
@@ -420,9 +387,7 @@ class ViewsTestCase(TestCase):
         self.assertNotIn("Medium Ad", ad_titles)
 
     def test_filter_by_city_case_insensitive(self):
-        """Фильтр по городу (регистр не важен)"""
         self.setUpFilters()
-        # Используем точное совпадение, т.к. iexact может не работать с кириллицей в SQLite
         response = self.client.get(reverse("advertisements"), {"city": "Москва"})
         self.assertEqual(response.status_code, 200)
         ads_in_context = list(response.context["advertisements"])
@@ -431,7 +396,6 @@ class ViewsTestCase(TestCase):
         self.assertNotIn("Test Ad", ad_titles)
 
     def test_filter_by_city_not_exists(self):
-        """Фильтр по несуществующему городу"""
         self.setUpFilters()
         response = self.client.get(reverse("advertisements"), {"city": "Владивосток"})
         self.assertEqual(response.status_code, 200)
@@ -439,7 +403,6 @@ class ViewsTestCase(TestCase):
         self.assertEqual(len(ads_in_context), 0)
 
     def test_combined_filters_price_and_city(self):
-        """Комбинированный фильтр: цена + город"""
         self.setUpFilters()
         response = self.client.get(
             reverse("advertisements"),
@@ -449,22 +412,19 @@ class ViewsTestCase(TestCase):
         ads_in_context = list(response.context["advertisements"])
         ad_titles = [ad.title for ad in ads_in_context]
         self.assertIn("Medium Ad", ad_titles)
-        self.assertNotIn("Expensive Ad", ad_titles)  # в другом городе
-        self.assertNotIn("Test Ad", ad_titles)  # цена ниже
+        self.assertNotIn("Expensive Ad", ad_titles)
+        self.assertNotIn("Test Ad", ad_titles)
 
     def test_filters_preserved_in_pagination(self):
-        """Проверка, что фильтры сохраняются в пагинации"""
         self.setUpFilters()
         response = self.client.get(
             reverse("advertisements"), {"min_price": "100", "city": "Москва"}
         )
         self.assertEqual(response.status_code, 200)
-        # Проверяем, что в контексте есть параметры фильтров
         self.assertEqual(response.context["min_price"], "100")
         self.assertEqual(response.context["city"], "Москва")
 
     def test_cities_list_in_context(self):
-        """Проверка, что список городов передаётся в контекст"""
         self.setUpFilters()
         response = self.client.get(reverse("advertisements"))
         self.assertEqual(response.status_code, 200)
@@ -474,10 +434,8 @@ class ViewsTestCase(TestCase):
         self.assertIn("Казань", cities)
 
     def test_no_filters_returns_all(self):
-        """Без фильтров должны отображаться все одобренные объявления"""
         self.setUpFilters()
         response = self.client.get(reverse("advertisements"))
         self.assertEqual(response.status_code, 200)
         ads_in_context = list(response.context["advertisements"])
-        # Должны быть все approved且sold=False объявления
-        self.assertGreaterEqual(len(ads_in_context), 4)  # test ad + 3 новых
+        self.assertGreaterEqual(len(ads_in_context), 4)

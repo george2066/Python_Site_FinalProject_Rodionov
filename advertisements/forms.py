@@ -5,19 +5,6 @@ from advertisements.models import Comment
 from advertisements.models import Location
 from advertisements.models import Rent
 
-"""
-Variant №1
-
-class AdvertisementForm(forms.ModelForm):
-    city = forms.CharField(max_length=255, required=False)
-    street = forms.CharField(max_length=255, required=False)
-    house = forms.CharField(max_length=255, required=False)
-
-    class Meta:
-        model = Advertisement
-        fields = ['image_url', 'title', 'category', 'description', 'price', 'location', 'city', 'street', 'house']
-"""
-
 
 class AdvertisementForm(forms.ModelForm):
     city = forms.CharField(max_length=255, required=False)
