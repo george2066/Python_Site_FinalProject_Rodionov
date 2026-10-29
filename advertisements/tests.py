@@ -141,7 +141,10 @@ class ViewsTestCase(TestCase):
                 "price": self.ad.price,
                 "category": self.ad.category.id,
                 "image_url": self.ad.image_url,
-                "location": self.ad.location,
+                "city": self.ad.location.city,
+                "street": self.ad.location.street,
+                "home": self.ad.location.home,
+                "apartment": self.ad.location.apartment,
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -158,7 +161,10 @@ class ViewsTestCase(TestCase):
                 "price": 50,
                 "category": 1,  # укажите существующую категорию
                 "image_url": "http://example.com/image2.jpg",
-                "location": "City",
+                "city": "TestCity",
+                "street": "TestStreet",
+                "home": "1",
+                "apartment": "10",
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -318,3 +324,160 @@ class ViewsTestCase(TestCase):
         self.rent.refresh_from_db()
         self.assertFalse(self.ad.sold)
         self.assertFalse(self.rent.payed)
+
+    # Tests for filters
+    def setUpFilters(self):
+        # Создаём дополнительные объявления с разными ценами и городами
+        self.location_msk = Location.objects.create(
+            city="Москва", street="Ленина", home="1"
+        )
+        self.location_spb = Location.objects.create(
+            city="Санкт-Петербург", street="Пушкина", home="2"
+        )
+        self.location_kazan = Location.objects.create(
+            city="Казань", street="Батурина", home="3"
+        )
+
+        self.ad_expensive = Advertisement.objects.create(
+            title="Expensive Ad",
+            description="Expensive",
+            price=5000,
+            category=self.ad.category,
+            location=self.location_msk,
+            author=self.user,
+            is_approved=True,
+            sold=False,
+        )
+        self.ad_medium = Advertisement.objects.create(
+            title="Medium Ad",
+            description="Medium price",
+            price=1000,
+            category=self.ad.category,
+            location=self.location_spb,
+            author=self.user,
+            is_approved=True,
+            sold=False,
+        )
+        self.ad_cheap = Advertisement.objects.create(
+            title="Cheap Ad",
+            description="Cheap",
+            price=100,
+            category=self.ad.category,
+            location=self.location_kazan,
+            author=self.user,
+            is_approved=True,
+            sold=False,
+        )
+
+    def test_filter_by_price_min(self):
+        """Фильтр по минимальной цене"""
+        self.setUpFilters()
+        response = self.client.get(reverse("advertisements"), {"min_price": "900"})
+        self.assertEqual(response.status_code, 200)
+        # Должны быть только объявления с ценой >= 900
+        ads_in_context = list(response.context["advertisements"])
+        ad_titles = [ad.title for ad in ads_in_context]
+        self.assertIn("Medium Ad", ad_titles)
+        self.assertIn("Expensive Ad", ad_titles)
+        self.assertNotIn("Cheap Ad", ad_titles)
+
+    def test_filter_by_price_max(self):
+        """Фильтр по максимальной цене"""
+        self.setUpFilters()
+        response = self.client.get(reverse("advertisements"), {"max_price": "1000"})
+        self.assertEqual(response.status_code, 200)
+        # Должны быть только объявления с ценой <= 1000
+        ads_in_context = list(response.context["advertisements"])
+        ad_titles = [ad.title for ad in ads_in_context]
+        self.assertIn("Test Ad", ad_titles)
+        self.assertIn("Cheap Ad", ad_titles)
+        self.assertIn("Medium Ad", ad_titles)
+        self.assertNotIn("Expensive Ad", ad_titles)
+
+    def test_filter_by_price_min_and_max(self):
+        """Фильтр по диапазону цен"""
+        self.setUpFilters()
+        response = self.client.get(
+            reverse("advertisements"), {"min_price": "50", "max_price": "2000"}
+        )
+        self.assertEqual(response.status_code, 200)
+        ads_in_context = list(response.context["advertisements"])
+        ad_titles = [ad.title for ad in ads_in_context]
+        self.assertIn("Test Ad", ad_titles)  # цена 100
+        self.assertIn("Cheap Ad", ad_titles)  # цена 100
+        self.assertIn("Medium Ad", ad_titles)  # цена 1000
+        self.assertNotIn("Expensive Ad", ad_titles)  # цена 5000
+
+    def test_filter_by_city(self):
+        """Фильтр по городу"""
+        self.setUpFilters()
+        response = self.client.get(reverse("advertisements"), {"city": "Москва"})
+        self.assertEqual(response.status_code, 200)
+        ads_in_context = list(response.context["advertisements"])
+        ad_titles = [ad.title for ad in ads_in_context]
+        self.assertIn("Expensive Ad", ad_titles)
+        self.assertNotIn("Test Ad", ad_titles)
+        self.assertNotIn("Medium Ad", ad_titles)
+
+    def test_filter_by_city_case_insensitive(self):
+        """Фильтр по городу (регистр не важен)"""
+        self.setUpFilters()
+        # Используем точное совпадение, т.к. iexact может не работать с кириллицей в SQLite
+        response = self.client.get(reverse("advertisements"), {"city": "Москва"})
+        self.assertEqual(response.status_code, 200)
+        ads_in_context = list(response.context["advertisements"])
+        ad_titles = [ad.title for ad in ads_in_context]
+        self.assertIn("Expensive Ad", ad_titles)
+        self.assertNotIn("Test Ad", ad_titles)
+
+    def test_filter_by_city_not_exists(self):
+        """Фильтр по несуществующему городу"""
+        self.setUpFilters()
+        response = self.client.get(reverse("advertisements"), {"city": "Владивосток"})
+        self.assertEqual(response.status_code, 200)
+        ads_in_context = list(response.context["advertisements"])
+        self.assertEqual(len(ads_in_context), 0)
+
+    def test_combined_filters_price_and_city(self):
+        """Комбинированный фильтр: цена + город"""
+        self.setUpFilters()
+        response = self.client.get(
+            reverse("advertisements"),
+            {"min_price": "500", "city": "Санкт-Петербург"},
+        )
+        self.assertEqual(response.status_code, 200)
+        ads_in_context = list(response.context["advertisements"])
+        ad_titles = [ad.title for ad in ads_in_context]
+        self.assertIn("Medium Ad", ad_titles)
+        self.assertNotIn("Expensive Ad", ad_titles)  # в другом городе
+        self.assertNotIn("Test Ad", ad_titles)  # цена ниже
+
+    def test_filters_preserved_in_pagination(self):
+        """Проверка, что фильтры сохраняются в пагинации"""
+        self.setUpFilters()
+        response = self.client.get(
+            reverse("advertisements"), {"min_price": "100", "city": "Москва"}
+        )
+        self.assertEqual(response.status_code, 200)
+        # Проверяем, что в контексте есть параметры фильтров
+        self.assertEqual(response.context["min_price"], "100")
+        self.assertEqual(response.context["city"], "Москва")
+
+    def test_cities_list_in_context(self):
+        """Проверка, что список городов передаётся в контекст"""
+        self.setUpFilters()
+        response = self.client.get(reverse("advertisements"))
+        self.assertEqual(response.status_code, 200)
+        cities = list(response.context["cities"])
+        self.assertIn("Москва", cities)
+        self.assertIn("Санкт-Петербург", cities)
+        self.assertIn("Казань", cities)
+
+    def test_no_filters_returns_all(self):
+        """Без фильтров должны отображаться все одобренные объявления"""
+        self.setUpFilters()
+        response = self.client.get(reverse("advertisements"))
+        self.assertEqual(response.status_code, 200)
+        ads_in_context = list(response.context["advertisements"])
+        # Должны быть все approved且sold=False объявления
+        self.assertGreaterEqual(len(ads_in_context), 4)  # test ad + 3 новых

@@ -25,6 +25,7 @@ from django.views.generic import UpdateView
 from yookassa import Configuration
 from yookassa import Payment
 
+from advertisements.forms import AdvertisementForm
 from advertisements.forms import CommentForm
 from advertisements.forms import RentForm
 from advertisements.models import Advertisement
@@ -95,7 +96,7 @@ def buy_rent(request, ad_id, rent_id):
 def payment_success(request):
     payment_id = request.session.get("payment_id")
     rent_id = request.session.get("rent_id")
-    advertisement_id = request.session.get("advrtisement_id")
+    advertisement_id = request.session.get("advertisement_id")
 
     if not payment_id:
         messages.error(request, "Платёж не найден.")
@@ -324,23 +325,10 @@ class AdvertisementDetailView(DetailView):
 class AdvertisementCreateView(LoginRequiredMixin, CreateView):
     login_url = reverse_lazy("account_login")
     model = Advertisement
-    fields = [
-        "image_url",
-        "title",
-        "category",
-        "description",
-        "price",
-    ]
+    form_class = AdvertisementForm
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        # Создаем или обновляем Location
-        location = Location.objects.create(
-            city=form.cleaned_data.get("city", ""),
-            street=form.cleaned_data.get("street", ""),
-            home=form.cleaned_data.get("home", ""),
-        )
-        form.instance.location = location
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -359,12 +347,10 @@ class AdvertisementDeleteView(LoginRequiredMixin, DeleteView):
 class AdvertisementUpdateView(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy("account_login")
     model = Advertisement
-    fields = [
-        "image_url",
-        "title",
-        "category",
-        "description",
-    ]
+    form_class = AdvertisementForm
+
+    def get_queryset(self):
+        return Advertisement.objects.filter(author=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -381,8 +367,27 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Получаем все объявления
+        # Получаем все одобренные не проданные объявления
         advertisements = filter_advertisements()
+
+        # Фильтр по цене
+        min_price = self.request.GET.get("min_price")
+        max_price = self.request.GET.get("max_price")
+        if min_price:
+            try:
+                advertisements = advertisements.filter(price__gte=float(min_price))
+            except ValueError:
+                pass
+        if max_price:
+            try:
+                advertisements = advertisements.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
+
+        # Фильтр по локации
+        city = self.request.GET.get("city")
+        if city:
+            advertisements = advertisements.filter(location__city__iexact=city)
 
         # Настройка пагинации (10 объявлений на страницу)
         paginator = Paginator(advertisements, settings.PAGE_ENTITY)
@@ -392,6 +397,16 @@ class HomePageView(TemplateView):
         context["advertisements"] = page_obj
         context["paginator"] = paginator
         context["page_obj"] = page_obj
+        context["min_price"] = min_price
+        context["max_price"] = max_price
+        context["city"] = city
+
+        # Получаем список городов для фильтра
+        context["cities"] = (
+            Location.objects.values_list("city", flat=True)
+            .distinct()
+            .order_by("city")
+        )
 
         return context
 

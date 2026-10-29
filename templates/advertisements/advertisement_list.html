@@ -8,11 +8,40 @@
     <h3>Haven't advertisement</h3>
 {% endif %}
 
-<form action="{% url 'search_results' %}" method="get">
-    <input name="q" type="text" placeholder="Search..." value="{{ query|default:'' }}">
-    <button type="submit">Search</button>
+<!-- Фильтры -->
+<form method="get" class="filters" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+    <h4>Фильтры</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+        <div>
+            <label for="city">Город:</label>
+            <select name="city" id="city" style="width: 100%; padding: 5px;">
+                <option value="">Все города</option>
+                {% for c in cities %}
+                    <option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="min_price">Цена от (₽):</label>
+            <input type="number" name="min_price" id="min_price" placeholder="От" value="{{ min_price|default:'' }}" style="width: 100%; padding: 5px;">
+        </div>
+        <div>
+            <label for="max_price">Цена до (₽):</label>
+            <input type="number" name="max_price" id="max_price" placeholder="До" value="{{ max_price|default:'' }}" style="width: 100%; padding: 5px;">
+        </div>
+    </div>
+    <div style="margin-top: 10px;">
+        <button type="submit" class="btn btn-primary">Применить фильтры</button>
+        <button type="button" class="btn btn-secondary" onclick="location.href='{% url "advertisements" %}'">Сбросить</button>
+    </div>
+</form>
+
+<!-- Поиск -->
+<form action="{% url 'search_results' %}" method="get" style="margin-bottom: 20px;">
+    <input name="q" type="text" placeholder="Search..." value="{{ query|default:'' }}" style="padding: 5px; width: 250px;">
+    <button type="submit" class="btn btn-info">Search</button>
     {% if request.GET.q %}
-        <input value="Reset search" type="button" onclick="location.href='{% url "advertisements" %}'">
+        <button type="button" class="btn btn-secondary" onclick="location.href='{% url "advertisements" %}'">Reset search</button>
     {% endif %}
 </form>
 
@@ -31,7 +60,7 @@
     <div class="pagination">
         <!-- Кнопка "Previous" -->
     {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn">Previous</a>
+        <a href="?page={{ page_obj.previous_page_number }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&city={{ city|default:'' }}" class="btn">Previous</a>
     {% else %}
         <span class="btn disabled">Previous</span>
     {% endif %}
@@ -42,7 +71,7 @@
         {% if num == page_obj.number %}
             <span class="btn current">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="btn">{{ num }}</a>
+            <a href="?page={{ num }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&city={{ city|default:'' }}" class="btn">{{ num }}</a>
         {% endif %}
     {% endfor %}
 
@@ -53,12 +82,12 @@
 
     <!-- Последняя страница (только если она не показана выше) -->
     {% if page_obj.number|add:'3' < page_obj.paginator.num_pages %}
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" class="btn">{{ page_obj.paginator.num_pages }}</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&city={{ city|default:'' }}" class="btn">{{ page_obj.paginator.num_pages }}</a>
     {% endif %}
 
     <!-- Кнопка "Next" -->
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="btn">Next</a>
+        <a href="?page={{ page_obj.next_page_number }}&min_price={{ min_price|default:'' }}&max_price={{ max_price|default:'' }}&city={{ city|default:'' }}" class="btn">Next</a>
     {% else %}
         <span class="btn disabled">Next</span>
     {% endif %}

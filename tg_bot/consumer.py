@@ -147,7 +147,6 @@ async def main() -> None:
 
 if __name__ == "__main__":
     try:
-        asyncio.run(receiving())
-        asyncio.run(main())
+        asyncio.run(asyncio.gather(receiving(), main()))
     except (KeyboardInterrupt, SystemExit):
         print("Бот остановлен разработчиком")
